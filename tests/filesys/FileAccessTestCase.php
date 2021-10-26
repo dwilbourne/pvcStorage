@@ -29,7 +29,9 @@ class FileAccessTestCase extends TestCase
     protected string $fixtureFileAdditional;
     protected string $fixtureFileNonExistent;
 
-    protected string $fixtureDirectory;
+    protected string $fixtureDirectoryWithFiles;
+    protected int $expectedNumberOfDirectoryEntriesWithoutDots;
+    protected string $fixtureDirectoryEmpty;
     protected string $fixtureDirectoryNonExistent;
 
     protected ErrorExceptionMsg $errmsg;
@@ -48,14 +50,19 @@ class FileAccessTestCase extends TestCase
             throw new Exception($this->makeErrMsg());
         }
         $this->vfsDirectory = $dir;
-        $this->fixtureDirectory = $this->vfsDirectory->url();
-        $this->fixtureDirectoryNonExistent = 'bar';
 
         $file = $filesys->getChild('Subdir_1/somecode.php');
         if (is_null($file)) {
             throw new Exception($this->makeErrMsg());
         }
         $this->vfsFile = $file;
+
+        $this->fixtureDirectoryWithFiles = $this->vfsDirectory->url();
+        $this->expectedNumberOfDirectoryEntriesWithoutDots = 4;
+        $dir = $filesys->getChild('Subdir_1/AnEmptyFolder');
+        $this->fixtureDirectoryEmpty = $dir->url();
+        $this->fixtureDirectoryNonExistent = 'bar';
+
         $this->fixtureFile = $this->vfsFile->url();
 
         $fileAdditional = $filesys->getChild('Subdir_1/somejavascript.js');

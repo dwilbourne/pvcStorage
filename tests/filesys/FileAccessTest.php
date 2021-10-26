@@ -31,12 +31,12 @@ class FileAccessTest extends FileAccessTestCase
 
     public function testFileExistsFailsWhenGivenADirectory() : void
     {
-        self::assertFalse($this->fileAccess->fileExists($this->fixtureDirectory));
+        self::assertFalse($this->fileAccess->fileExists($this->fixtureDirectoryWithFiles));
     }
 
     public function testDirectoryExists() : void
     {
-        self::assertTrue($this->fileAccess->directoryExists($this->fixtureDirectory));
+        self::assertTrue($this->fileAccess->directoryExists($this->fixtureDirectoryWithFiles));
     }
 
     public function testDirectoryExistsFailsOnBadDirectory() : void
@@ -89,7 +89,7 @@ class FileAccessTest extends FileAccessTestCase
 
     public function testFileIsWriteableFailsWhenIsADirectory() : void
     {
-        self::assertFalse($this->fileAccess->fileIsWriteable($this->fixtureDirectory));
+        self::assertFalse($this->fileAccess->fileIsWriteable($this->fixtureDirectoryWithFiles));
     }
 
     public function testFileProspectiveIsWriteableWhenFileExistsAndIsWriteable() : void
@@ -105,28 +105,28 @@ class FileAccessTest extends FileAccessTestCase
 
     public function testFileProspectiveIsWriteableWhenFileDoesNotExist() : void
     {
-        $prospectiveFile = $this->fixtureDirectory . DIRECTORY_SEPARATOR . 'foo.php';
+        $prospectiveFile = $this->fixtureDirectoryWithFiles . DIRECTORY_SEPARATOR . 'foo.php';
         self::assertTrue($this->fileAccess->fileProspectiveIsWriteable($prospectiveFile));
     }
 
     public function testFileProspectiveIsNotWriteableWhenFileDoesNotExist() : void
     {
-        $prospectiveFile = $this->fixtureDirectory . DIRECTORY_SEPARATOR . 'foo.php';
+        $prospectiveFile = $this->fixtureDirectoryWithFiles . DIRECTORY_SEPARATOR . 'foo.php';
         $this->vfsDirectory->chmod(0444);
         self::assertFalse($this->fileAccess->fileProspectiveIsWriteable($prospectiveFile));
     }
 
     public function testFileProspectiveIsWriteableFailsWhenIsADirectory() : void
     {
-        self::assertFalse($this->fileAccess->fileProspectiveIsWriteable($this->fixtureDirectory));
+        self::assertFalse($this->fileAccess->fileProspectiveIsWriteable($this->fixtureDirectoryWithFiles));
     }
 
 
     public function testDirectoryIsReadable() : void
     {
-        self::assertTrue($this->fileAccess->directoryIsReadable($this->fixtureDirectory));
+        self::assertTrue($this->fileAccess->directoryIsReadable($this->fixtureDirectoryWithFiles));
         $this->vfsDirectory->chmod(0000);
-        self::assertFalse($this->fileAccess->directoryIsReadable($this->fixtureDirectory));
+        self::assertFalse($this->fileAccess->directoryIsReadable($this->fixtureDirectoryWithFiles));
     }
 
     public function testDirectoryIsReadableFailsWhenIsAFile() : void
@@ -139,11 +139,32 @@ class FileAccessTest extends FileAccessTestCase
         self::assertFalse($this->fileAccess->directoryIsReadable($this->fixtureDirectoryNonExistent));
     }
 
+    public function testGetDirectoryContentsWhenDirectoryIsNotReadable() : void
+    {
+        self::assertNull($this->fileAccess->getDirectoryContents($this->fixtureDirectoryNonExistent));
+    }
+
+    public function testGetDirectoryContentsReturnsFileNames() : void
+    {
+        $directoryContents = $this->fileAccess->getDirectoryContents($this->fixtureDirectoryWithFiles);
+        self::assertIsArray($directoryContents);
+        /* "." and ".." are not returned as part of listing the contents of the directory */
+        self::assertEquals($this->expectedNumberOfDirectoryEntriesWithoutDots, count($directoryContents));
+    }
+
+    public function testGetDirectoryContentsReturnsEmptyArrayForEmptyDirectory() : void
+    {
+        $directoryContents = $this->fileAccess->getDirectoryContents($this->fixtureDirectoryEmpty);
+        self::assertIsArray($directoryContents);
+        /* "." and ".." are not returned as part of listing the contents of the directory */
+        self::assertEquals(0, count($directoryContents));
+    }
+
     public function testDirectoryIsWriteable() : void
     {
-        self::assertTrue($this->fileAccess->directoryIsWriteable($this->fixtureDirectory));
+        self::assertTrue($this->fileAccess->directoryIsWriteable($this->fixtureDirectoryWithFiles));
         $this->vfsDirectory->chmod(0000);
-        self::assertFalse($this->fileAccess->directoryIsWriteable($this->fixtureDirectory));
+        self::assertFalse($this->fileAccess->directoryIsWriteable($this->fixtureDirectoryWithFiles));
     }
 
     public function testDirectoryIsWriteableFailsWhenIsAFile() : void

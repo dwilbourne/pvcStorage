@@ -40,47 +40,33 @@ class FileAccess
     protected array $modeSuffixes = ['', 'b', 't'];
 
     /**
-     * getHandle.  This should and will throw an error if it is called and handle is not set.
-     * @return mixed
-     */
-    public function getHandle()
-    {
-        return $this->handle;
-    }
-
-    /**
      * getFileAccessErrmsg
      * @return FileAccessExceptionMsg
      */
-    public function getFileAccessErrmsg() : FileAccessExceptionMsg
+    public function getFileAccessErrmsg(): FileAccessExceptionMsg
     {
         return $this->fileAccessErrmsg;
     }
 
     /**
-     * fileEntryExists
+     * fileIsReadable
      * @param string $filename
      * @return bool
      */
-    protected function fileEntryExists(string $filename) : bool
+    public function fileIsReadable(string $filename): bool
     {
-        if (!file_exists($filename)) {
+        if (!$this->fileExists($filename)) {
+            return false;
+        }
+
+        if (!is_readable($filename)) {
             $msgVars = [$filename];
-            $msgText = 'file/directory %s does not exist or you do not have permissions to list the file.';
+            $msgText = 'you do not have sufficient permissions to read file %s.';
             $this->fileAccessErrmsg = new FileAccessExceptionMsg($msgVars, $msgText);
             return false;
         }
+        unset($this->fileAccessErrmsg);
         return true;
-    }
-
-    /**
-     * modeIsReadOnly
-     * @param string $mode
-     * @return bool
-     */
-    protected function modeIsReadOnly(string $mode) : bool
-    {
-        return ('r' == substr($mode, 0, 1));
     }
 
     /**
@@ -104,18 +90,15 @@ class FileAccess
     }
 
     /**
-     * directoryExists
-     * @param string $dirname
+     * fileEntryExists
+     * @param string $filename
      * @return bool
      */
-    public function directoryExists(string $dirname) : bool
+    protected function fileEntryExists(string $filename): bool
     {
-        if (!$this->fileEntryExists($dirname)) {
-            return false;
-        }
-        if (is_file($dirname)) {
-            $msgVars = [$dirname];
-            $msgText = 'directory name must be a directory - cannot be a file.';
+        if (!file_exists($filename)) {
+            $msgVars = [$filename];
+            $msgText = 'file/directory %s does not exist or you do not have permissions to list the file.';
             $this->fileAccessErrmsg = new FileAccessExceptionMsg($msgVars, $msgText);
             return false;
         }
@@ -124,24 +107,24 @@ class FileAccess
     }
 
     /**
-     * fileIsReadable
+     * fileProspectiveIsWriteable
      * @param string $filename
      * @return bool
      */
-    public function fileIsReadable(string $filename) : bool
+    public function fileProspectiveIsWriteable(string $filename): bool
     {
-        if (!$this->fileExists($filename)) {
-            return false;
+        if ($this->fileExists($filename)) {
+            return $this->fileIsWriteable($filename);
         }
-
-        if (!is_readable($filename)) {
+        if ($this->directoryExists($filename)) {
             $msgVars = [$filename];
-            $msgText = 'you do not have sufficient permissions to read file %s.';
+            $msgText = 'file to write to (%s) cannot be an existing directory.';
             $this->fileAccessErrmsg = new FileAccessExceptionMsg($msgVars, $msgText);
             return false;
         }
+        $dir = pathinfo($filename, PATHINFO_DIRNAME);
         unset($this->fileAccessErrmsg);
-        return true;
+        return $this->directoryIsWriteable($dir);
     }
 
     /**
@@ -166,39 +149,18 @@ class FileAccess
     }
 
     /**
-     * fileProspectiveIsWriteable
-     * @param string $filename
-     * @return bool
-     */
-    public function fileProspectiveIsWriteable(string $filename) : bool
-    {
-        if ($this->fileExists($filename)) {
-            return $this->fileIsWriteable($filename);
-        }
-        if ($this->directoryExists($filename)) {
-            $msgVars = [$filename];
-            $msgText = 'file to write to (%s) cannot be an existing directory.';
-            $this->fileAccessErrmsg = new FileAccessExceptionMsg($msgVars, $msgText);
-            return false;
-        }
-        $dir = pathinfo($filename, PATHINFO_DIRNAME);
-        return $this->directoryIsWriteable($dir);
-    }
-
-    /**
-     * directoryIsReadable
+     * directoryExists
      * @param string $dirname
      * @return bool
      */
-    public function directoryIsReadable(string $dirname) : bool
+    public function directoryExists(string $dirname): bool
     {
-        if (!$this->directoryExists($dirname)) {
+        if (!$this->fileEntryExists($dirname)) {
             return false;
         }
-
-        if (!is_readable($dirname)) {
+        if (is_file($dirname)) {
             $msgVars = [$dirname];
-            $msgText = 'you do not have sufficient permissions to read directory %s.';
+            $msgText = 'directory name must be a directory - cannot be a file.';
             $this->fileAccessErrmsg = new FileAccessExceptionMsg($msgVars, $msgText);
             return false;
         }
@@ -211,7 +173,7 @@ class FileAccess
      * @param string $dirname
      * @return bool
      */
-    public function directoryIsWriteable(string $dirname) : bool
+    public function directoryIsWriteable(string $dirname): bool
     {
         if (!$this->directoryExists($dirname)) {
             return false;
@@ -228,102 +190,49 @@ class FileAccess
     }
 
     /**
-     * openFile
-     * @param string $filename
-     * @param string $mode
-     * @return bool
-     * @throws FileAccessException
+     * getDirectoryContents
+     * @param string $dirname
+     * @return array<string>|null
      */
-    public function openFile(string $filename, string $mode): bool
+    public function getDirectoryContents(string $dirname, bool $withDots = false): ?array
     {
-        $previousErrorReportingLevel = error_reporting();
-        error_reporting(E_ALL);
-
-        try {
-            $handle = fopen($filename, $mode);
-        } catch (Throwable $e) {
-            $msgText = $e->getMessage();
-            $msgVars = [$filename];
+        if (!$this->directoryIsReadable($dirname)) {
+            return null;
+        }
+        $fileArray = scandir($dirname);
+        if ($fileArray === false) {
+            $msgVars = [$dirname];
+            $msgText = 'unknown filesystem error trying to list the files in directory %s.';
             $this->fileAccessErrmsg = new FileAccessExceptionMsg($msgVars, $msgText);
+            return null;
         }
 
-        error_reporting($previousErrorReportingLevel);
-
-        if (isset($this->fileAccessErrmsg)) {
-            return false;
+        unset($this->fileAccessErrmsg);
+        if (!$withDots) {
+            $fileArray = array_diff((array) $fileArray, array('.', '..'));
         }
-
-        /* phpstan does not see that handle must be already set */
-        /** @phpstan-ignore-next-line */
-        if ($handle === false) {
-            $msgText = 'internal error - file handle not set and no error condition detected.';
-            $msg = new FileAccessExceptionMsg([], $msgText);
-            throw new FileAccessException($msg);
-        }
-
-        $this->handle = $handle;
-        $this->filename = $filename;
-        return true;
+        return $fileArray;
     }
 
     /**
-     * closeFile
-     */
-    public function closeFile(): bool
-    {
-        if (is_null($this->handle)) {
-            $msgText = 'Error trying to close file that was not opened.';
-            $this->fileAccessErrmsg = new FileAccessExceptionMsg([], $msgText);
-            return false;
-        }
-        fclose($this->handle);
-        $this->handle = null;
-        return true;
-    }
-
-    /**
-     * writeFile
-     * @param string $data
+     * directoryIsReadable
+     * @param string $dirname
      * @return bool
      */
-    public function writeFile(string $data) : bool
+    public function directoryIsReadable(string $dirname): bool
     {
-        if (is_null($this->handle)) {
-            $msgText = 'Error trying to write to file that was not opened.';
-            $this->fileAccessErrmsg = new FileAccessExceptionMsg([], $msgText);
+        if (!$this->directoryExists($dirname)) {
             return false;
         }
-        if (false === fwrite($this->handle, $data)) {
-            $msgText = 'error trying to write to file %s.';
-            $this->fileAccessErrmsg = new FileAccessExceptionMsg([$this->filename], $msgText);
-            return false;
-        }
-        return true;
-    }
 
-    /**
-     * readFile
-     * @param int $length
-     * @return false|string
-     */
-    public function readFile(int $length = 8096)
-    {
-        if ($length < 1) {
-            $msgText = 'Length parameter must be greater than 0.';
-            $this->fileAccessErrmsg = new FileAccessExceptionMsg([], $msgText);
+        if (!is_readable($dirname)) {
+            $msgVars = [$dirname];
+            $msgText = 'you do not have sufficient permissions to read directory %s.';
+            $this->fileAccessErrmsg = new FileAccessExceptionMsg($msgVars, $msgText);
             return false;
         }
-        if (is_null($this->handle)) {
-            $msgText = 'Error trying to read from file that was not opened.';
-            $this->fileAccessErrmsg = new FileAccessExceptionMsg([], $msgText);
-            return false;
-        }
-        if (false === ($result = fread($this->handle, $length))) {
-            $msgText = 'Filesystem error trying to read from file.';
-            $this->fileAccessErrmsg = new FileAccessExceptionMsg([], $msgText);
-            return false;
-        }
-        return $result;
+        unset($this->fileAccessErrmsg);
+        return true;
     }
 
     /**
@@ -363,11 +272,102 @@ class FileAccess
     }
 
     /**
+     * getHandle.  This should and will throw an error if it is called and handle is not set.
+     * @return mixed
+     */
+    public function getHandle()
+    {
+        return $this->handle;
+    }
+
+    /**
+     * openFile
+     * @param string $filename
+     * @param string $mode
+     * @return bool
+     * @throws FileAccessException
+     */
+    public function openFile(string $filename, string $mode): bool
+    {
+        $previousErrorReportingLevel = error_reporting();
+        error_reporting(E_ALL);
+
+        try {
+            $handle = fopen($filename, $mode);
+        } catch (Throwable $e) {
+            $msgText = $e->getMessage();
+            $msgVars = [$filename];
+            $this->fileAccessErrmsg = new FileAccessExceptionMsg($msgVars, $msgText);
+        }
+
+        error_reporting($previousErrorReportingLevel);
+
+        if (isset($this->fileAccessErrmsg)) {
+            return false;
+        }
+
+        /* phpstan does not see that handle must be already set */
+        /** @phpstan-ignore-next-line */
+        if ($handle === false) {
+            $msgText = 'internal error - file handle not set and no error condition detected.';
+            $msg = new FileAccessExceptionMsg([], $msgText);
+            throw new FileAccessException($msg);
+        }
+
+        unset($this->fileAccessErrmsg);
+        $this->handle = $handle;
+        $this->filename = $filename;
+        return true;
+    }
+
+    /**
+     * readFile
+     * @param int $length
+     * @return false|string
+     */
+    public function readFile(int $length = 8096)
+    {
+        if ($length < 1) {
+            $msgText = 'Length parameter must be greater than 0.';
+            $this->fileAccessErrmsg = new FileAccessExceptionMsg([], $msgText);
+            return false;
+        }
+        if (is_null($this->handle)) {
+            $msgText = 'Error trying to read from file that was not opened.';
+            $this->fileAccessErrmsg = new FileAccessExceptionMsg([], $msgText);
+            return false;
+        }
+        if (false === ($result = fread($this->handle, $length))) {
+            $msgText = 'Filesystem error trying to read from file.';
+            $this->fileAccessErrmsg = new FileAccessExceptionMsg([], $msgText);
+            return false;
+        }
+        unset($this->fileAccessErrmsg);
+        return $result;
+    }
+
+    /**
+     * closeFile
+     */
+    public function closeFile(): bool
+    {
+        if (is_null($this->handle)) {
+            $msgText = 'Error trying to close file that was not opened.';
+            $this->fileAccessErrmsg = new FileAccessExceptionMsg([], $msgText);
+            return false;
+        }
+        fclose($this->handle);
+        $this->handle = null;
+        unset($this->fileAccessErrmsg);
+        return true;
+    }
+
+    /**
      * eof
      * @return bool
      * @throws FileAccessException
      */
-    public function eof() : bool
+    public function eof(): bool
     {
         if (is_null($this->getHandle())) {
             $msgText = 'error trying to determine whether eof is true:  no file is currently open.';
@@ -376,6 +376,7 @@ class FileAccess
             throw new FileAccessException($msg);
         }
 
+        unset($this->fileAccessErrmsg);
         return feof($this->handle);
     }
 
@@ -386,7 +387,7 @@ class FileAccess
      * @return bool
      * @throws FileAccessException
      */
-    public function filePutContents(string $filename, string $data) : bool
+    public function filePutContents(string $filename, string $data): bool
     {
         if (!is_null($this->getHandle())) {
             $msgText = 'error trying to open file.  This object already has another file open.';
@@ -406,6 +407,28 @@ class FileAccess
         }
 
         $this->closeFile();
+        unset($this->fileAccessErrmsg);
+        return true;
+    }
+
+    /**
+     * writeFile
+     * @param string $data
+     * @return bool
+     */
+    public function writeFile(string $data): bool
+    {
+        if (is_null($this->handle)) {
+            $msgText = 'Error trying to write to file that was not opened.';
+            $this->fileAccessErrmsg = new FileAccessExceptionMsg([], $msgText);
+            return false;
+        }
+        if (false === fwrite($this->handle, $data)) {
+            $msgText = 'error trying to write to file %s.';
+            $this->fileAccessErrmsg = new FileAccessExceptionMsg([$this->filename], $msgText);
+            return false;
+        }
+        unset($this->fileAccessErrmsg);
         return true;
     }
 
@@ -426,6 +449,18 @@ class FileAccess
             $this->fileAccessErrmsg = $msg;
             return false;
         }
+        unset($this->fileAccessErrmsg);
         return $line;
+    }
+
+    /**
+     * modeIsReadOnly
+     * @param string $mode
+     * @return bool
+     */
+    protected function modeIsReadOnly(string $mode): bool
+    {
+        unset($this->fileAccessErrmsg);
+        return ('r' == substr($mode, 0, 1));
     }
 }
