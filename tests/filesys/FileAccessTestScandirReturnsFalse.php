@@ -15,6 +15,9 @@ use pvc\filesys\err\FileAccessExceptionMsg;
 
 include("ScanDirReturnsFalse.php");
 
+/**
+ * @covers \pvc\filesys\FileAccess
+ */
 class FileAccessTestScandirReturnsFalse extends FileAccessTestCase
 {
     public function testGetDirectoryContentsWhenDirectoryReadFails() : void

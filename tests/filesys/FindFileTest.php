@@ -13,6 +13,10 @@ use pvc\filesys\FindFile;
 use pvc\regex\Regex;
 use tests\filesys\fixture\MockFilesysFixture;
 
+/**
+ * @covers \pvc\filesys\FindFile
+ */
+
 class FindFileTest extends TestCase
 {
     protected MockFilesysFixture $mockFilesys;

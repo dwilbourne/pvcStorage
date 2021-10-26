@@ -10,6 +10,9 @@ use Error;
 use pvc\filesys\err\FileAccessException;
 use pvc\filesys\err\FileAccessExceptionMsg;
 
+/**
+ * @covers \pvc\filesys\FileAccess
+ */
 class FileAccessTest extends FileAccessTestCase
 {
     public function testConstruction() : void
