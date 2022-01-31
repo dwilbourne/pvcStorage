@@ -1,22 +1,21 @@
-<phpunit colors="true" bootstrap="vendor/autoload.php">
-
-    <logging>
-        <log type="coverage-html" target="coverage"/>
-    </logging>
-
-    <filter>
-        <whitelist>
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" bootstrap="vendor/autoload.php"
+         forceCoversAnnotation="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+    <coverage>
+        <include>
             <directory>src/filesys*</directory>
-        </whitelist>
-    </filter>
-
-
+        </include>
+        <exclude>
+            <file>src/filesys/messages/messages+intl-icu.en.php</file>
+        </exclude>
+        <report>
+            <html outputDirectory="coverage"/>
+        </report>
+    </coverage>
+    <logging/>
     <testsuites>
-
         <testsuite name="src_tests">
             <directory>tests/filesys*</directory>
         </testsuite>
-
     </testsuites>
-
 </phpunit>

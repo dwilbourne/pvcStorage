@@ -6,53 +6,56 @@
 
 namespace tests\filesys;
 
-use Error;
-use pvc\filesys\err\FileAccessException;
-use pvc\filesys\err\FileAccessExceptionMsg;
+use pvc\filesys\messages\FileAccessMsg;
 
 /**
  * @covers \pvc\filesys\FileAccess
  */
 class FileAccessTest extends FileAccessTestCase
 {
-    public function testConstruction() : void
+    public function testConstruction(): void
     {
         // verify that untyped property is initialized to null
         self::assertNull($this->fileAccess->getHandle());
     }
 
-    public function testNonExistentFileDoesNotExist() : void
+    public function testNonExistentFileDoesNotExist(): void
     {
         self::assertFalse($this->fileAccess->fileExists($this->fixtureFileNonExistent));
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $this->fileAccess->getFileAccessErrmsg());
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testFileWhichDoesExistInMockFilesystem() : void
+    public function testFileWhichDoesExistInMockFilesystem(): void
     {
         self::assertTrue($this->fileAccess->fileExists($this->fixtureFile));
+        self::assertNull(($this->fileAccess->getFileAccessMsg()));
     }
 
-    public function testFileExistsFailsWhenGivenADirectory() : void
+    public function testFileExistsFailsWhenGivenADirectory(): void
     {
-        self::assertFalse($this->fileAccess->fileExists($this->fixtureDirectoryWithFiles));
+        self::assertFalse($this->fileAccess->fileExists($this->fixtureDirectory));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testDirectoryExists() : void
+    public function testDirectoryExists(): void
     {
-        self::assertTrue($this->fileAccess->directoryExists($this->fixtureDirectoryWithFiles));
+        self::assertTrue($this->fileAccess->directoryExists($this->fixtureDirectory));
+        self::assertNull($this->fileAccess->getFileAccessMsg());
     }
 
-    public function testDirectoryExistsFailsOnBadDirectory() : void
+    public function testDirectoryExistsFailsOnBadDirectory(): void
     {
         self::assertFalse($this->fileAccess->directoryExists($this->fixtureDirectoryNonExistent));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testDirectoryExistsFailsWhenGivenAFile() : void
+    public function testDirectoryExistsFailsWhenGivenAFile(): void
     {
         self::assertFalse($this->fileAccess->directoryExists($this->fixtureFile));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testFilePermissions() : void
+    public function testFilePermissions(): void
     {
         // default permissions in the mock filesystem for files are set to null,
         // which is equivalent to 0666 (read / write for owner / group / world)
@@ -64,188 +67,184 @@ class FileAccessTest extends FileAccessTestCase
     }
 
 
-    public function testFileIsNotReadableWhenDoesNotExist() : void
+    public function testFileIsNotReadableWhenDoesNotExist(): void
     {
         self::assertFalse($this->fileAccess->fileIsReadable($this->fixtureFileNonExistent));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testFileIsReadable() : void
+    public function testFileIsReadable(): void
     {
         self::assertTrue($this->fileAccess->fileIsReadable($this->fixtureFile));
         // now change permissions to so no one can do anything
         $this->vfsFile->chmod(0000);
         self::assertFalse($this->fileAccess->fileIsReadable($this->fixtureFile));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testFileIsNotWriteableWhenDoesNotExist() : void
+    public function testFileIsNotWriteableWhenDoesNotExist(): void
     {
         self::assertFalse($this->fileAccess->fileIsWriteable($this->fixtureFileNonExistent));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testFileIsWriteable() : void
+    public function testFileIsWriteable(): void
     {
         self::assertTrue($this->fileAccess->fileIsWriteable($this->fixtureFile));
         // now change permissions to so file is read only for everyone
         $this->vfsFile->chmod(0444);
         self::assertFalse($this->fileAccess->fileIsWriteable($this->fixtureFile));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testFileIsWriteableFailsWhenIsADirectory() : void
+    public function testFileIsWriteableFailsWhenIsADirectory(): void
     {
-        self::assertFalse($this->fileAccess->fileIsWriteable($this->fixtureDirectoryWithFiles));
+        self::assertFalse($this->fileAccess->fileIsWriteable($this->fixtureDirectory));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testFileProspectiveIsWriteableWhenFileExistsAndIsWriteable() : void
+    public function testDirectoryIsReadable(): void
     {
-        self::assertTrue($this->fileAccess->fileProspectiveIsWriteable($this->fixtureFile));
-    }
-
-    public function testFileProspectiveIsWriteableWhenFileExistsAndIsNotWriteable() : void
-    {
-        $this->vfsFile->chmod(0444);
-        self::assertFalse($this->fileAccess->fileProspectiveIsWriteable($this->fixtureFile));
-    }
-
-    public function testFileProspectiveIsWriteableWhenFileDoesNotExist() : void
-    {
-        $prospectiveFile = $this->fixtureDirectoryWithFiles . DIRECTORY_SEPARATOR . 'foo.php';
-        self::assertTrue($this->fileAccess->fileProspectiveIsWriteable($prospectiveFile));
-    }
-
-    public function testFileProspectiveIsNotWriteableWhenFileDoesNotExist() : void
-    {
-        $prospectiveFile = $this->fixtureDirectoryWithFiles . DIRECTORY_SEPARATOR . 'foo.php';
-        $this->vfsDirectory->chmod(0444);
-        self::assertFalse($this->fileAccess->fileProspectiveIsWriteable($prospectiveFile));
-    }
-
-    public function testFileProspectiveIsWriteableFailsWhenIsADirectory() : void
-    {
-        self::assertFalse($this->fileAccess->fileProspectiveIsWriteable($this->fixtureDirectoryWithFiles));
-    }
-
-
-    public function testDirectoryIsReadable() : void
-    {
-        self::assertTrue($this->fileAccess->directoryIsReadable($this->fixtureDirectoryWithFiles));
+        self::assertTrue($this->fileAccess->directoryIsReadable($this->fixtureDirectory));
+        self::assertNull($this->fileAccess->getFileAccessMsg());
         $this->vfsDirectory->chmod(0000);
-        self::assertFalse($this->fileAccess->directoryIsReadable($this->fixtureDirectoryWithFiles));
+        self::assertFalse($this->fileAccess->directoryIsReadable($this->fixtureDirectory));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testDirectoryIsReadableFailsWhenIsAFile() : void
+    public function testDirectoryIsReadableFailsWhenIsAFile(): void
     {
         self::assertFalse($this->fileAccess->directoryIsReadable($this->fixtureFile));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testDirectoryIsReadableFailsWhenDoesNotExist() : void
+    public function testDirectoryIsReadableFailsWhenDoesNotExist(): void
     {
         self::assertFalse($this->fileAccess->directoryIsReadable($this->fixtureDirectoryNonExistent));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testGetDirectoryContentsWhenDirectoryIsNotReadable() : void
+    public function testGetDirectoryContentsWhenDirectoryIsNotReadable(): void
     {
         self::assertNull($this->fileAccess->getDirectoryContents($this->fixtureDirectoryNonExistent));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testGetDirectoryContentsReturnsFileNames() : void
+    public function testGetDirectoryContentsReturnsFileNamesWithRecurse(): void
     {
-        $directoryContents = $this->fileAccess->getDirectoryContents($this->fixtureDirectoryWithFiles);
+        $directoryContents = $this->fileAccess->getDirectoryContents($this->fixtureDirectory);
         self::assertIsArray($directoryContents);
-        /* "." and ".." are not returned as part of listing the contents of the directory */
-        self::assertEquals($this->expectedNumberOfDirectoryEntriesWithoutDots, count($directoryContents));
+        /* "." and ".." are not returned as part of listing the contents of the directory, recurse defaults to true */
+        self::assertEquals(
+            $this->expectedNumberOfDirectoryEntriesWithoutDotsAndWithRecursing,
+            count($directoryContents)
+        );
+        self::assertNull($this->fileAccess->getFileAccessMsg());
     }
 
-    public function testGetDirectoryContentsReturnsEmptyArrayForEmptyDirectory() : void
+    public function testGetDirectoryContentsReturnsFileNamesWithDotsWithoutRecursing(): void
+    {
+        $directoryContents = $this->fileAccess->getDirectoryContents($this->fixtureDirectory, null, false, true);
+        self::assertIsArray($directoryContents);
+        self::assertEquals(
+            $this->expectedNumberOfDirectoryEntriesWithDotsAndWithoutRecursing,
+            count($directoryContents)
+        );
+        self::assertNull($this->fileAccess->getFileAccessMsg());
+    }
+
+    public function testGetDirectoryContentsReturnsEmptyArrayForEmptyDirectory(): void
     {
         $directoryContents = $this->fileAccess->getDirectoryContents($this->fixtureDirectoryEmpty);
         self::assertIsArray($directoryContents);
         /* "." and ".." are not returned as part of listing the contents of the directory */
         self::assertEquals(0, count($directoryContents));
+        self::assertNull($this->fileAccess->getFileAccessMsg());
     }
 
-    public function testDirectoryIsWriteable() : void
+    public function testDirectoryIsWriteable(): void
     {
-        self::assertTrue($this->fileAccess->directoryIsWriteable($this->fixtureDirectoryWithFiles));
+        self::assertTrue($this->fileAccess->directoryIsWriteable($this->fixtureDirectory));
+        self::assertNull($this->fileAccess->getFileAccessMsg());
         $this->vfsDirectory->chmod(0000);
-        self::assertFalse($this->fileAccess->directoryIsWriteable($this->fixtureDirectoryWithFiles));
+        self::assertFalse($this->fileAccess->directoryIsWriteable($this->fixtureDirectory));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testDirectoryIsWriteableFailsWhenIsAFile() : void
+    public function testDirectoryIsWriteableFailsWhenIsAFile(): void
     {
         self::assertFalse($this->fileAccess->directoryIsWriteable($this->fixtureFile));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testDirectoryIsWriteableFailsWhenDoesNotExist() : void
+    public function testDirectoryIsWriteableFailsWhenDoesNotExist(): void
     {
         self::assertFalse($this->fileAccess->directoryIsWriteable($this->fixtureDirectoryNonExistent));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
-
-
 
     /**
      * testOpenFileFails
      */
-    public function testOpenFileFailsAndThereforeCloseFileFailsBecauseFileIsNotOpen() : void
+    public function testOpenFileFailsAndThereforeCloseFileFailsBecauseFileIsNotOpen(): void
     {
         $mode = 'r';
         self::assertFalse($this->fileAccess->openFile($this->fixtureFileNonExistent, $mode));
-        $openFileErrmsg = $this->fileAccess->getFileAccessErrmsg();
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $openFileErrmsg);
+        $openFileErrmsg = $this->fileAccess->getFileAccessMsg();
+        self::assertInstanceOf(FileAccessMsg::class, $openFileErrmsg);
 
         self::assertNull($this->fileAccess->getHandle());
 
         self::assertFalse($this->fileAccess->closeFile());
-        $closeFileErrmsg = $this->fileAccess->getFileAccessErrmsg();
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $closeFileErrmsg);
+        $closeFileErrmsg = $this->fileAccess->getFileAccessMsg();
+        self::assertInstanceOf(FileAccessMsg::class, $closeFileErrmsg);
         self::assertNotEquals($openFileErrmsg, $closeFileErrmsg);
     }
 
-    public function testOpenFileFailsWhenPermissionsAreInsufficient() : void
+    public function testOpenFileFailsWhenPermissionsAreInsufficient(): void
     {
         // remove all permissions
         $this->vfsFile->chmod(0000);
         $mode = 'r';
         self::assertFalse($this->fileAccess->openFile($this->fixtureFile, $mode));
-        $openFileErrmsg = $this->fileAccess->getFileAccessErrmsg();
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $openFileErrmsg);
+        $openFileErrmsg = $this->fileAccess->getFileAccessMsg();
+        self::assertInstanceOf(FileAccessMsg::class, $openFileErrmsg);
     }
 
     /**
      * testOpenFileSucceedsCanGetHandleAndCloseFileSucceeds
      */
-    public function testOpenFileSucceedsCanGetHandleAndCloseFileSucceeds() : void
+    public function testOpenFileSucceedsCanGetHandleAndCloseFileSucceeds(): void
     {
         $mode = 'r';
         self::assertTrue($this->fileAccess->openFile($this->fixtureFile, $mode));
         self::assertNotNull($this->fileAccess->getHandle());
-        /* trying to access unset property should produce an error */
-        self::expectException(Error::class);
-        $msg = $this->fileAccess->getFileAccessErrmsg();
+        self::assertNull($this->fileAccess->getFileAccessMsg());
         $this->fileAccess->closeFile();
     }
 
-    public function testWriteFileFailsOnFileWhichWasNotOpened() : void
+    public function testWriteFileFailsOnFileWhichWasNotOpened(): void
     {
         self::assertFalse($this->fileAccess->writeFile('some text'));
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $this->fileAccess->getFileAccessErrmsg());
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testReadFileInvalidLength() : void
+    public function testReadFileInvalidLength(): void
     {
         // length must be positive
         $badLength = 0;
         self::assertFalse($this->fileAccess->readFile($badLength));
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $this->fileAccess->getFileAccessErrmsg());
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testReadFileFailsWhenFileWasNotOpened() : void
+    public function testReadFileFailsWhenFileWasNotOpened(): void
     {
         // default length is 8096 and we will not specify something different
         self::assertFalse($this->fileAccess->readFile());
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $this->fileAccess->getFileAccessErrmsg());
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testReadFileSucceedsAndEOFIsTrue() : void
+    public function testReadFileSucceedsAndEOFIsTrue(): void
     {
         $mode = 'r';
         self::assertTrue($this->fileAccess->openFile($this->fixtureFile, $mode));
@@ -255,7 +254,7 @@ class FileAccessTest extends FileAccessTestCase
         $this->fileAccess->closeFile();
     }
 
-    public function testReadFileSucceedsWithMultipleReads() : void
+    public function testReadFileSucceedsWithMultipleReads(): void
     {
         $mode = 'r';
         self::assertTrue($this->fileAccess->openFile($this->fixtureFile, $mode));
@@ -269,13 +268,13 @@ class FileAccessTest extends FileAccessTestCase
         self::assertEquals($expectedResult, $actualResult);
     }
 
-    public function testEofThrowsException() : void
+    public function testEofIsNullWhenFileIsNotOpen(): void
     {
-        self::expectException(FileAccessException::class);
-        $result = $this->fileAccess->eof();
+        self::assertNull($this->fileAccess->eof());
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testWriteReadFileSucceeds() : void
+    public function testWriteReadFileSucceeds(): void
     {
         $testData = 'some text';
 
@@ -290,58 +289,58 @@ class FileAccessTest extends FileAccessTestCase
         $this->fileAccess->closeFile();
     }
 
-    public function testFileGetContentsSucceeds() : void
+    public function testFileGetContentsSucceeds(): void
     {
         $expectedResult = 'some php content';
-        self::assertEquals($expectedResult, $this->fileAccess->fileGetContents($this->fixtureFile));
+        self::assertEquals($expectedResult, $this->fileAccess->getFileContents($this->fixtureFile));
     }
 
-    public function testFileGetContentsFailsWhenHandleAlreadySet() : void
+    public function testFileGetContentsFailsWhenHandleAlreadySet(): void
     {
         $mode = 'r';
         self::assertTrue($this->fileAccess->openFile($this->fixtureFileAdditional, $mode));
-        self::assertFalse($this->fileAccess->fileGetContents($this->fixtureFile));
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $this->fileAccess->getFileAccessErrmsg());
+        self::assertFalse($this->fileAccess->getFileContents($this->fixtureFile));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testGetFileContentsFailsWithInsufficientPermissions() : void
+    public function testGetFileContentsFailsWithInsufficientPermissions(): void
     {
         $this->vfsFile->chmod(0000);
-        self::assertFalse($this->fileAccess->fileGetContents($this->fixtureFile));
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $this->fileAccess->getFileAccessErrmsg());
+        self::assertFalse($this->fileAccess->getFileContents($this->fixtureFile));
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testFilePutContentsFileGetContentsSucceeds() : void
+    public function testFilePutContentsFileGetContentsSucceeds(): void
     {
         $contents = 'this is some string.';
         self::assertTrue($this->fileAccess->filePutContents($this->fixtureFile, $contents));
-        self::assertEquals($contents, $this->fileAccess->fileGetContents($this->fixtureFile));
+        self::assertEquals($contents, $this->fileAccess->getFileContents($this->fixtureFile));
     }
 
-    public function testPutFileContentsFailsWhenFileIsAlreadyOpen() : void
+    public function testPutFileContentsFailsWhenFileIsAlreadyOpen(): void
     {
         $mode = 'r';
         self::assertTrue($this->fileAccess->openFile($this->fixtureFile, $mode));
         $contents = 'this is some string.';
         self::assertFalse($this->fileAccess->filePutContents($this->fixtureFile, $contents));
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $this->fileAccess->getFileAccessErrmsg());
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testPutFileContentsFailsWithInsufficientPermissions() : void
+    public function testPutFileContentsFailsWithInsufficientPermissions(): void
     {
         $this->vfsFile->chmod(0000);
         $contents = 'this is some string.';
         self::assertFalse($this->fileAccess->filePutContents($this->fixtureFile, $contents));
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $this->fileAccess->getFileAccessErrmsg());
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testFileGetLineFailsWhenFileIsNotOpen() : void
+    public function testFileGetLineFailsWhenFileIsNotOpen(): void
     {
         self::assertFalse($this->fileAccess->fileGetLine());
-        self::assertInstanceOf(FileAccessExceptionMsg::class, $this->fileAccess->getFileAccessErrmsg());
+        self::assertInstanceOf(FileAccessMsg::class, $this->fileAccess->getFileAccessMsg());
     }
 
-    public function testFileGetLineSucceeds() : void
+    public function testFileGetLineSucceeds(): void
     {
         $expectedResult = 'some php content';
         $mode = 'r';

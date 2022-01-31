@@ -10,9 +10,7 @@ namespace tests\filesys\fixture;
 use bovigo\vfs\vfsStream;
 use bovigo\vfs\vfsStreamContent;
 use bovigo\vfs\vfsStreamDirectory;
-use pvc\err\throwable\exception\stock_rebrands\Exception;
-use pvc\err\throwable\exception\stock_rebrands\InvalidArgumentException;
-use pvc\msg\ErrorExceptionMsg;
+use Exception;
 
 /**
  * Class MockFilesysFixture.  This object can be used as a fixture for tests that need a mocked file system.
@@ -124,7 +122,6 @@ class MockFilesysFixture
      * @param vfsStreamContent $vfsStreamContent
      * @param string $regex
      * @return array
-     * @throws InvalidArgumentException
      */
     public function findVfsFiles(vfsStreamContent $vfsStreamContent, string $regex): array
     {

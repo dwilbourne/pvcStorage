@@ -7,13 +7,10 @@ namespace tests\filesys;
  */
 
 use bovigo\vfs\vfsStreamContent;
-use bovigo\vfs\vfsStreamDirectory;
-use bovigo\vfs\vfsStreamFile;
 use PHPUnit\Framework\TestCase;
-use pvc\err\throwable\exception\stock_rebrands\Exception;
 use pvc\filesys\FileAccess;
-use pvc\msg\ErrorExceptionMsg;
 use tests\filesys\fixture\MockFilesysFixture;
+use Exception;
 
 /**
  * Class FileAccessTestCase
@@ -29,12 +26,11 @@ class FileAccessTestCase extends TestCase
     protected string $fixtureFileAdditional;
     protected string $fixtureFileNonExistent;
 
-    protected string $fixtureDirectoryWithFiles;
-    protected int $expectedNumberOfDirectoryEntriesWithoutDots;
+    protected string $fixtureDirectory;
+    protected int $expectedNumberOfDirectoryEntriesWithoutDotsAndWithoutRecursing;
+    protected int $expectedNumberOfDirectoryEntriesWithoutDotsAndWithRecursing;
     protected string $fixtureDirectoryEmpty;
     protected string $fixtureDirectoryNonExistent;
-
-    protected ErrorExceptionMsg $errmsg;
 
 
     public function setUp(): void
@@ -57,8 +53,9 @@ class FileAccessTestCase extends TestCase
         }
         $this->vfsFile = $file;
 
-        $this->fixtureDirectoryWithFiles = $this->vfsDirectory->url();
-        $this->expectedNumberOfDirectoryEntriesWithoutDots = 4;
+        $this->fixtureDirectory = $this->vfsDirectory->url();
+        $this->expectedNumberOfDirectoryEntriesWithDotsAndWithoutRecursing = 6;
+        $this->expectedNumberOfDirectoryEntriesWithoutDotsAndWithRecursing = 8;
         $dir = $filesys->getChild('Subdir_1/AnEmptyFolder');
         $this->fixtureDirectoryEmpty = $dir->url();
         $this->fixtureDirectoryNonExistent = 'bar';
@@ -74,10 +71,8 @@ class FileAccessTestCase extends TestCase
         $this->fixtureFileNonExistent = 'foo';
     }
 
-    protected function makeErrMsg() : ErrorExceptionMsg
+    protected function makeErrMsg() : string
     {
-        $msgText = 'unable to create mock file system.';
-        $msgVars = [];
-        return new ErrorExceptionMsg($msgVars, $msgText);
+        return 'unable to create mock file system.';
     }
 }
