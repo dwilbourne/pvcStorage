@@ -11,7 +11,7 @@ use pvc\filesys\messages\FileAccessMsg;
 /** @runTestsInSeparateProcesses  */
 class FileAccessWithUopzTest extends FileAccessTestCase
 {
-    public function testGetDirectoryContentsWhenDirectoryReadFails() : void
+    public function testGetDirectoryContentsWhenDirectoryReadFails(): void
     {
         uopz_set_return('scandir', false);
         $directoryContents = $this->fileAccess->getDirectoryContents($this->fixtureDirectory);
@@ -20,7 +20,7 @@ class FileAccessWithUopzTest extends FileAccessTestCase
         uopz_unset_return('scandir');
     }
 
-    public function testOpenFileReturnsFalseWhenFOpenReturnsFalse() : void
+    public function testOpenFileReturnsFalseWhenFOpenReturnsFalse(): void
     {
         uopz_set_return('fopen', false);
         $mode = 'w';
@@ -28,7 +28,7 @@ class FileAccessWithUopzTest extends FileAccessTestCase
         uopz_unset_return('fopen');
     }
 
-    public function testReadFileFailsWhenFreadFails() : void
+    public function testReadFileFailsWhenFreadFails(): void
     {
         uopz_set_return('fread', false);
         $mode = 'r';
@@ -38,7 +38,7 @@ class FileAccessWithUopzTest extends FileAccessTestCase
         uopz_unset_return('fread');
     }
 
-    public function testWriteFileFailsWhenFwriteFails() : void
+    public function testWriteFileFailsWhenFwriteFails(): void
     {
         uopz_set_return('fwrite', false);
         $mode = 'w';
@@ -48,7 +48,7 @@ class FileAccessWithUopzTest extends FileAccessTestCase
         uopz_unset_return('fwrite');
     }
 
-    public function testGetFileContentsWhenFilesizeReturnsFalse() : void
+    public function testGetFileContentsWhenFilesizeReturnsFalse(): void
     {
         // buffersize (length) should be set to PHP_INT_MAX
         uopz_set_return('filesize', false);
@@ -57,7 +57,7 @@ class FileAccessWithUopzTest extends FileAccessTestCase
         uopz_unset_return('filesize');
     }
 
-    public function testPutFileContentsFailsWhenFWriteFails() : void
+    public function testPutFileContentsFailsWhenFWriteFails(): void
     {
         uopz_set_return('fwrite', false);
         $contents = 'this is some string.';
@@ -66,7 +66,7 @@ class FileAccessWithUopzTest extends FileAccessTestCase
         uopz_unset_return('fwrite');
     }
 
-    public function testGetLineFailsWhenFgetsFails() : void
+    public function testGetLineFailsWhenFgetsFails(): void
     {
         uopz_set_return('fgets', false);
         $mode = 'r';

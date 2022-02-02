@@ -1,4 +1,5 @@
 <?php
+
 namespace tests\filesys;
 
 /**
@@ -33,6 +34,9 @@ class FileAccessTestCase extends TestCase
     protected string $fixtureDirectoryNonExistent;
 
 
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
         $this->fileAccess = new FileAccess();
@@ -48,9 +52,6 @@ class FileAccessTestCase extends TestCase
         $this->vfsDirectory = $dir;
 
         $file = $filesys->getChild('Subdir_1/somecode.php');
-        if (is_null($file)) {
-            throw new Exception($this->makeErrMsg());
-        }
         $this->vfsFile = $file;
 
         $this->fixtureDirectory = $this->vfsDirectory->url();
@@ -63,15 +64,11 @@ class FileAccessTestCase extends TestCase
         $this->fixtureFile = $this->vfsFile->url();
 
         $fileAdditional = $filesys->getChild('Subdir_1/somejavascript.js');
-        if (is_null($fileAdditional)) {
-            throw new Exception($this->makeErrMsg());
-        }
-
         $this->fixtureFileAdditional = $fileAdditional->url();
         $this->fixtureFileNonExistent = 'foo';
     }
 
-    protected function makeErrMsg() : string
+    protected function makeErrMsg(): string
     {
         return 'unable to create mock file system.';
     }

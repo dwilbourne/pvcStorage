@@ -175,7 +175,9 @@ class FileAccess
     /**
      * getDirectoryContents
      * @param string $dirname
-     * @param callable $callback
+     * @param callable|null $callback
+     * @param bool $recurseYn
+     * @param bool $includeDotFiles
      * @return array<string>|null
      *
      * dirname is the directory to search.  The optional callback gives you the ability to pass logic into the
@@ -216,8 +218,9 @@ class FileAccess
             if ($recurseYn && is_dir($filePath) && (!in_array($filename, $dotArray))) {
                 // include the directory entry itself
                 $result[] = $filePath;
-                // recursively obtained results do not contain dots
-                $result = array_merge($result, $this->getDirectoryContents($filePath, $callback, true, false));
+                // We can use the default values for the third and fourth parameters in the recursive call.  Recursively
+                // obtained results should not contain dots
+                $result = array_merge($result, $this->getDirectoryContents($filePath, $callback));
             } elseif (in_array($filename, $dotArray)) {
                 if ($includeDotFiles) {
                     $result[] = $filePath;
@@ -258,11 +261,11 @@ class FileAccess
     /**
      * getHandle.
      * @return mixed
-     * returns the handle, or null if it is not set
+     * returns the handle, or null if it is not set because it is not (cannot be) type-hinted
      */
     public function getHandle()
     {
-        return $this->handle ?? null;
+        return $this->handle;
     }
 
     /**

@@ -135,20 +135,20 @@ class FileAccessTest extends FileAccessTestCase
         $directoryContents = $this->fileAccess->getDirectoryContents($this->fixtureDirectory);
         self::assertIsArray($directoryContents);
         /* "." and ".." are not returned as part of listing the contents of the directory, recurse defaults to true */
-        self::assertEquals(
+        self::assertCount(
             $this->expectedNumberOfDirectoryEntriesWithoutDotsAndWithRecursing,
-            count($directoryContents)
+            $directoryContents
         );
         self::assertNull($this->fileAccess->getFileAccessMsg());
     }
 
     public function testGetDirectoryContentsReturnsFileNamesWithDotsWithoutRecursing(): void
     {
-        $directoryContents = $this->fileAccess->getDirectoryContents($this->fixtureDirectory, null, false, true);
+        $directoryContents = $this->fileAccess->getDirectoryContents($this->fixtureDirectory);
         self::assertIsArray($directoryContents);
-        self::assertEquals(
+        self::assertCount(
             $this->expectedNumberOfDirectoryEntriesWithDotsAndWithoutRecursing,
-            count($directoryContents)
+            $directoryContents
         );
         self::assertNull($this->fileAccess->getFileAccessMsg());
     }
@@ -158,7 +158,7 @@ class FileAccessTest extends FileAccessTestCase
         $directoryContents = $this->fileAccess->getDirectoryContents($this->fixtureDirectoryEmpty);
         self::assertIsArray($directoryContents);
         /* "." and ".." are not returned as part of listing the contents of the directory */
-        self::assertEquals(0, count($directoryContents));
+        self::assertCount(0, $directoryContents);
         self::assertNull($this->fileAccess->getFileAccessMsg());
     }
 

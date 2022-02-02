@@ -167,7 +167,7 @@ class MockFilesysFixture
     /**
      * changePermissionsOnRootToUnreadable
      */
-    public function changePermissionsOnRootToUnreadable() : void
+    public function changePermissionsOnRootToUnreadable(): void
     {
         $this->getVfsFilesys()->chmod(0000);
     }
