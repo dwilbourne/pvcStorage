@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace pvc\html\err;
+namespace pvc\storage\err;
 
 use pvc\err\stock\LogicException;
 use pvc\err\stock\RuntimeException;

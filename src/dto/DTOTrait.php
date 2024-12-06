@@ -7,10 +7,10 @@ declare(strict_types=1);
 
 namespace pvc\storage\dto;
 
-use pvc\html\err\DTOExtraPropertyException;
-use pvc\html\err\DTOInvalidPropertyValueException;
-use pvc\html\err\DTOMissingPropertyException;
-use pvc\interfaces\storage\dto\DtoInterface;
+use pvc\storage\err\DTOExtraPropertyException;
+use pvc\storage\err\DTOInvalidPropertyValueException;
+use pvc\storage\err\DTOMissingPropertyException;
+
 use ReflectionClass;
 use ReflectionProperty;
 use Throwable;
