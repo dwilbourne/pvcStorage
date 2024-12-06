@@ -10,6 +10,7 @@ namespace pvc\storage\dto;
 use pvc\html\err\DTOExtraPropertyException;
 use pvc\html\err\DTOInvalidPropertyValueException;
 use pvc\html\err\DTOMissingPropertyException;
+use pvc\interfaces\storage\dto\DtoInterface;
 use ReflectionClass;
 use ReflectionProperty;
 use Throwable;
@@ -37,7 +38,7 @@ trait DTOTrait
      * @throws DTOMissingPropertyException
      * @throws DTOInvalidPropertyValueException
      */
-    public function hydrateFromArray(array $constructorProperties): void
+    public function hydrate(array $constructorProperties): void
     {
         $reflection = new ReflectionClass(static::class);
 
