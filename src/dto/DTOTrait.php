@@ -38,7 +38,7 @@ trait DTOTrait
      * @throws DTOMissingPropertyException
      * @throws DTOInvalidPropertyValueException
      */
-    public function hydrate(array $constructorProperties): void
+    public function hydrateFromArray(array $constructorProperties): void
     {
         $reflection = new ReflectionClass(static::class);
 
