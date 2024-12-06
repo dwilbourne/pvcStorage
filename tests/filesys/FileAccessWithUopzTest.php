@@ -6,8 +6,8 @@
 
 namespace tests\filesys;
 
-use pvc\filesys\err\FileAccessException;
-use pvc\filesys\err\FileAccessExceptionMsg;
+use pvc\storage\err\FileAccessException;
+use pvc\storage\filesys\err\FileAccessExceptionMsg;
 
 /** @runTestsInSeparateProcesses  */
 class FileAccessWithUopzTest extends FileAccessTestCase

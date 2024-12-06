@@ -1,64 +1,78 @@
-<?php declare(strict_types = 1);
+<?php
 
-namespace pvc\filesys;
+declare(strict_types=1);
 
-use pvc\filesys\err\FilesysBadSearchDirException;
-use pvc\filesys\err\FilesysBadSearchDirMsg;
-use pvc\filesys\err\FileSystemException;
-use pvc\filesys\err\FileSystemExceptionMsg;
+namespace pvc\storage\filesys;
+
+use pvc\interfaces\storage\filesys\FileFilterInterface;
+use pvc\storage\err\InvalidSortOrderException;
 
 /**
- * FindFile traverses a local filesystem looking for matches to the callback provided.
+ * FindFiles iterates over a filesystem looking for matches to the fileFilter provided.
  *
- * In a simple use, the callback could be to look for filenames that contain certain letters or have a certain
+ * In a simple use, the fileFilter could be to look for filenames that contain certain letters or have a certain
  * extension.  A more sophisticated use might involve opening each file and inspecting the contents.
  *
- * Class FindFile
+ * You can set a flag to indicate whether scandir should sort ascending / decending / not at all.
+ * You can set a flag to search depth-first or breadth-first.
+ *
+ * Class FindFiles
  */
-class FindFile
+class FindFiles
 {
-
     /**
-     * @var callable
+     * @var FileFilterInterface
      */
-    protected $callback;
+    protected FileFilterInterface $fileFilter;
 
     /**
      * @var bool
      */
-    protected bool $recurse=true;
+    protected bool $recurse = true;
 
     /**
-     * FindFile constructor.
+     * @var int
+     * choices are currently implemented as the stock sort orders available in the scandir function
+     */
+    protected int $fileSortOrder = SCANDIR_SORT_ASCENDING;
+
+    /**
+     * @var array<int>
+     */
+    private array $sortOrderChoices = [SCANDIR_SORT_ASCENDING, SCANDIR_SORT_DESCENDING, SCANDIR_SORT_NONE];
+
+
+    /**
+     * FindFiles constructor.
      * @param callable|null $callback
      */
     public function __construct(callable $callback = null)
     {
-        $this->setCallback($callback);
+        $this->setFileFilter($callback);
     }
 
 
     /**
-     * @function getCallback
+     * @function getFileFilter
      * @return callable
      */
-    public function getCallback(): callable
+    public function getFileFilter(): callable
     {
-        return $this->callback;
+        return $this->fileFilter;
     }
 
     /**
-     * @function setCallback
-     * @param callable|null $callback
+     * @function setFileFilter
+     * @param callable|null $fileFilter
      */
-    public function setCallback(callable $callback = null): void
+    public function setFileFilter(callable $fileFilter = null): void
     {
-        if (is_null($callback)) {
-            $callback = function () {
+        if (is_null($fileFilter)) {
+            $fileFilter = function () {
                 return true;
             };
         }
-        $this->callback = $callback;
+        $this->fileFilter = $fileFilter;
     }
 
     /**
@@ -79,6 +93,20 @@ class FindFile
         $this->recurse = $value;
     }
 
+    public function setFileSortOrder(int $sortOrder): void
+    {
+        if (!in_array($sortOrder, $this->sortOrderChoices)) {
+            throw new InvalidSortOrderException();
+        }
+        $this->fileSortOrder = $sortOrder;
+    }
+
+    public function getFileSortOrder(): int
+    {
+        return $this->fileSortOrder;
+    }
+
+
     /**
      * @function findFiles
      * @param string $dir
@@ -90,7 +118,7 @@ class FindFile
 
         if (!is_dir($dir) || !is_readable($dir)) {
             $msg = new FilesysBadSearchDirMsg();
-            throw new FilesysBadSearchDirException($msg);
+            throw new DirectoryDoesNotExistException($msg);
         }
 
         if (false === ($handle = @opendir($dir))) {
@@ -107,7 +135,7 @@ class FindFile
                 $matchedfiles = array_merge($matchedfiles, $subdir_matches);
                 unset($file);
             } elseif (!is_dir($filePath)) {
-                if (call_user_func($this->callback, $filePath)) {
+                if (call_user_func($this->fileFilter, $filePath)) {
                     array_push($matchedfiles, $filePath);
                 }
             }

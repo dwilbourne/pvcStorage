@@ -1,22 +1,24 @@
-<phpunit colors="true" bootstrap="vendor/autoload.php">
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         colors="true"
+         bootstrap="vendor/autoload.php"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd">
 
-    <logging>
-        <log type="coverage-html" target="coverage"/>
-    </logging>
+  <coverage>
+    <include>
+      <directory>src/filesys*</directory>
+    </include>
+    <report>
+      <html outputDirectory="coverage"/>
+    </report>
+  </coverage>
 
-    <filter>
-        <whitelist>
-            <directory>src/filesys*</directory>
-        </whitelist>
-    </filter>
+  <logging/>
 
-
-    <testsuites>
-
-        <testsuite name="src_tests">
-            <directory>tests/filesys*</directory>
-        </testsuite>
-
-    </testsuites>
+  <testsuites>
+    <testsuite name="src_tests">
+      <directory>tests/filesys*</directory>
+    </testsuite>
+  </testsuites>
 
 </phpunit>

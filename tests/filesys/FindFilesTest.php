@@ -8,26 +8,25 @@ namespace tests\filesys;
 
 use PHPUnit\Framework\TestCase;
 use pvc\err\throwable\exception\stock_rebrands\InvalidArgumentException;
-use pvc\filesys\err\FileSystemException;
-use pvc\filesys\FindFile;
-use pvc\regex\Regex;
+use pvc\storage\filesys\err\FileSystemException;
+use pvc\storage\filesys\FindFiles;
 use tests\filesys\fixture\MockFilesysFixture;
 
 /**
- * @covers \pvc\filesys\FindFile
+ * @covers \pvc\storage\filesys\FindFiles
  */
 
-class FindFileTest extends TestCase
+class FindFilesTest extends TestCase
 {
     protected MockFilesysFixture $mockFilesys;
-    protected FindFile $findFile;
+    protected FindFiles $findFiles;
     protected string $mockRoot;
 
     public function setUp() : void
     {
         $this->mockFilesys = new MockFilesysFixture();
         $this->mockRoot = $this->mockFilesys->getVfsRoot();
-        $this->findFile = new FindFile();
+        $this->findFiles = new FindFiles();
     }
 
     public function testFindFilesSearchDirException1() : void
@@ -35,7 +34,7 @@ class FindFileTest extends TestCase
         // is not a directory
         $searchDir = 'foo';
         self::expectException(InvalidArgumentException::class);
-        $this->findFile->findFiles($searchDir);
+        $this->findFiles->findFiles($searchDir);
     }
 
     /**
@@ -46,7 +45,7 @@ class FindFileTest extends TestCase
         $searchDir = __DIR__;
         uopz_set_return('is_readable', false);
         self::expectException(InvalidArgumentException::class);
-        $this->findFile->findFiles($searchDir);
+        $this->findFiles->findFiles($searchDir);
         uopz_unset_return('is_readable');
     }
 
@@ -58,7 +57,7 @@ class FindFileTest extends TestCase
         $searchDir = __DIR__;
         uopz_set_return('opendir', false);
         self::expectException(FileSystemException::class);
-        $this->findFile->findFiles($searchDir);
+        $this->findFiles->findFiles($searchDir);
         uopz_unset_return('open_dir');
     }
 
@@ -66,32 +65,34 @@ class FindFileTest extends TestCase
     {
         $callback = function () {
         };
-        $this->findFile->setCallback($callback);
-        self::assertEquals($callback, $this->findFile->getCallback());
+        $this->findFiles->setFileFilter($callback);
+        self::assertEquals($callback, $this->findFiles->getFileFilter());
     }
 
     public function testSetGetRecurse() : void
     {
-        self::assertEquals(true, $this->findFile->getRecurse());
-        $this->findFile->setRecurse(false);
-        self::assertFalse($this->findFile->getRecurse());
+        self::assertEquals(true, $this->findFiles->getRecurse());
+        $this->findFiles->setRecurse(false);
+        self::assertFalse($this->findFiles->getRecurse());
     }
 
 
     public function testFindFileAll() : void
     {
         $expectedResult = $this->mockFilesys->getAllFilesFixture();
-        $actualResult = $this->findFile->findFiles($this->mockRoot);
+        $actualResult = $this->findFiles->findFiles($this->mockRoot);
         static::assertSame($expectedResult, $actualResult);
     }
 
     public function testFindFilePhp() : void
     {
         $expectedResult = $this->mockFilesys->getPhpFilesFixture();
-        $regex = new Regex();
-        $regex->setPattern('/\.php$/');
-        $this->findFile->setCallback([$regex, 'match']);
-        $actualResult = $this->findFile->findFiles($this->mockRoot);
+		$callback = function(string $filename) {
+			$pattern = '/\.php$/';
+			return preg_match($pattern, $filename, $matches);
+		};
+		$this->findFiles->setFileFilter($callback);
+        $actualResult = $this->findFiles->findFiles($this->mockRoot);
         static::assertSame($expectedResult, $actualResult);
     }
 
@@ -102,13 +103,16 @@ class FindFileTest extends TestCase
         $countJsFiles = count($this->mockFilesys->getJsFilesFixture());
         $expectedResult = $countAllFiles - $countJsFiles;
 
-        $regex = new Regex();
-        $regex->setPattern('/\.js$/');
-        $this->findFile->setCallback([$regex, 'match']);
-        $this->findFile->deleteFiles($this->mockRoot);
+		$callback = function(string $filename) {
+			$pattern = '/\.js$/';
+			return preg_match($pattern, $filename, $matches);
+		};
+	    $this->findFiles->setFileFilter($callback);
 
-        $this->findFile->setCallback(null);
-        $remainingFiles = $this->findFile->findFiles($this->mockRoot);
+        $this->findFiles->deleteFiles($this->mockRoot);
+
+        $this->findFiles->setFileFilter(null);
+        $remainingFiles = $this->findFiles->findFiles($this->mockRoot);
         $actualResult = count($remainingFiles);
 
         static::assertSame($expectedResult, $actualResult);
@@ -116,11 +120,12 @@ class FindFileTest extends TestCase
 
     public function testDeleteFilesNoMatches() : void
     {
-        $regex = new Regex();
-        // no files with the file extension zzz
-        $regex->setPattern('/\.zzz$/');
-        $this->findFile->setCallback([$regex, 'match']);
-        self::assertFalse($this->findFile->deleteFiles($this->mockRoot));
+	    $callback = function(string $filename) {
+		    $pattern = '/\.zzz$/';
+		    return preg_match($pattern, $filename, $matches);
+	    };
+	    $this->findFiles->setFileFilter($callback);
+        self::assertFalse($this->findFiles->deleteFiles($this->mockRoot));
     }
 
     public function testInspectFileContents() : void
@@ -133,8 +138,8 @@ class FindFileTest extends TestCase
             return preg_match('/this/i', $string);
         };
 
-        $this->findFile->setCallback($closure);
-        $actualResult = $this->findFile->findFiles($this->mockRoot);
+        $this->findFiles->setFileFilter($closure);
+        $actualResult = $this->findFiles->findFiles($this->mockRoot);
 
         static::assertEquals($expectedResult, $actualResult);
     }

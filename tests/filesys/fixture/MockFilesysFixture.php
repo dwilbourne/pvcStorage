@@ -1,39 +1,74 @@
 <?php
+
 /**
- * @package: pvc
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
- * @version: 1.0
  */
 
-namespace tests\filesys\fixture;
+declare(strict_types=1);
+
+namespace pvcTests\storage\filesys\fixture;
 
 use bovigo\vfs\vfsStream;
 use bovigo\vfs\vfsStreamContent;
 use bovigo\vfs\vfsStreamDirectory;
-use pvc\err\throwable\exception\stock_rebrands\Exception;
-use pvc\err\throwable\exception\stock_rebrands\InvalidArgumentException;
-use pvc\msg\ErrorExceptionMsg;
 
 /**
- * Class MockFilesysFixture.  This object can be used as a fixture for tests that need a mocked file system.
+ * Class MockFilesysFixture.
  */
 class MockFilesysFixture
 {
-    protected vfsStreamDirectory $vfsFilesys;
+    /**
+     * @var vfsStreamDirectory
+     */
+    protected vfsStreamDirectory $vfsFileSys;
+
+    /**
+     * @var string
+     */
     protected string $vfsRoot;
-    protected array $allFilesFixture;
-    protected array $phpFilesFixture;
-    protected array $jsFilesFixture;
-    protected array $cssCsvFilesFixture;
-    protected array $filesContainingTheWordThisFixture;
+
+    /**
+     * @var string[]
+     */
+    protected array $allFiles;
+
+    /**
+     * @var string[]
+     */
+    protected array $phpFiles;
+
+    /**
+     * @var string[]
+     */
+    protected array $jsFiles;
+
+    /**
+     * @var string[]
+     */
+    protected array $cssCsvFiles;
+
+    protected vfsStreamContent $vfsDirectory;
+    protected vfsStreamContent $vfsEmptyDirectory;
+    protected vfsStreamContent $vfsFile;
+    protected vfsStreamContent $vfsFileAdditional;
+
+    protected string $urlDirectoryWithFiles;
+    protected string $urlDirectoryEmpty;
+    protected string $urlDirectoryNonExistent;
+    protected string $urlFile;
+    protected string $urlFileAdditional;
+    protected string $urlFileNonExistent;
+    protected array $urlFilesContainingTheWordThis;
+
+    protected int $expectedNumberOfDirectoryEntriesWithoutDots;
+
 
     /**
      * MockFilesysFixture constructor.
-     * @throws Exception
      */
     public function __construct()
     {
-        /** @var array[string[]] $arrSrcFiles */
+        /** @var array<string|array<string>> $arrSrcFiles */
         $arrSrcFiles = [
             'Subdir_1' => [
                 'AbstractFactory' => [
@@ -61,7 +96,7 @@ class MockFilesysFixture
             'fileInRootOfFixture.ini' => 'Maybe this is some kind of a configuration file... or not'
         ];
 
-        $this->allFilesFixture = [
+        $this->allFiles = [
             'vfs://root/Subdir_1/AbstractFactory/test.php',
             'vfs://root/Subdir_1/AbstractFactory/other.php',
             'vfs://root/Subdir_1/AbstractFactory/Invalid.csv',
@@ -79,7 +114,7 @@ class MockFilesysFixture
             'vfs://root/fileInRootOfFixture.ini'
         ];
 
-        $this->phpFilesFixture = [
+        $this->phpFiles = [
             'vfs://root/Subdir_1/AbstractFactory/test.php',
             'vfs://root/Subdir_1/AbstractFactory/other.php',
             'vfs://root/Subdir_1/somecode.php',
@@ -89,19 +124,19 @@ class MockFilesysFixture
             'vfs://root/Subdir_2/SmallLibrary/libFile_4.php'
         ];
 
-        $this->jsFilesFixture = [
+        $this->jsFiles = [
             'vfs://root/Subdir_1/somejavascript.js',
             'vfs://root/Subdir_2/SmallLibrary/libFile.js',
             'vfs://root/Subdir_2/SmallLibrary/OtherJSFile.js'
         ];
 
-        $this->cssCsvFilesFixture = [
+        $this->cssCsvFiles = [
             'vfs://root/Subdir_1/AbstractFactory/Invalid.csv',
             'vfs://root/Subdir_1/AbstractFactory/valid.css',
             'vfs://root/Subdir_2/SmallLibrary/libFile.css'
         ];
 
-        $this->filesContainingTheWordThisFixture = [
+        $this->urlFilesContainingTheWordThis = [
             'vfs://root/Subdir_1/somejavascript.js',
             'vfs://root/Subdir_2/SmallLibrary/libFile_1.php',
             'vfs://root/Subdir_2/SmallLibrary/libFile_2.php',
@@ -114,17 +149,40 @@ class MockFilesysFixture
         $filesysRoot = 'root';
         $permissions = null;
 
-        $filesys = vfsStream::setup($filesysRoot, $permissions, $arrSrcFiles);
-        $this->vfsFilesys = $filesys;
-        $this->vfsRoot = $this->vfsFilesys->url();
+        /**
+         * type vfsStreamDirectory
+         */
+        $this->vfsFileSys = vfsStream::setup($filesysRoot, $permissions, $arrSrcFiles);
+
+        /**
+         * type vfsStreamContent
+         */
+        $this->vfsDirectory = $this->vfsFileSys->getChild('Subdir_1');
+        $this->vfsEmptyDirectory = $this->vfsFileSys->getChild('Subdir_1/AnEmptyFolder');
+        $this->vfsFile = $this->vfsFileSys->getChild('Subdir_1/somecode.php');
+        $this->vfsFileAdditional = $this->vfsFileSys->getChild('Subdir_1/somejavascript.js');
+
+        /**
+         * type string
+         */
+        $this->vfsRoot = $this->vfsFileSys->url();
+
+        $this->urlDirectoryWithFiles = $this->vfsDirectory->url();
+        $this->urlDirectoryEmpty = $this->vfsEmptyDirectory->url();
+        $this->urlDirectoryNonExistent = 'bar';
+
+        $this->urlFile = $this->vfsFile->url();
+        $this->urlFileAdditional = $this->vfsFileAdditional->url();
+        $this->urlFileNonExistent = 'foo';
+
+        $this->expectedNumberOfDirectoryEntriesWithoutDots = 4;
     }
 
     /**
      * @function findVfsFiles
      * @param vfsStreamContent $vfsStreamContent
      * @param string $regex
-     * @return array
-     * @throws InvalidArgumentException
+     * @return array<string|array<string>>
      */
     public function findVfsFiles(vfsStreamContent $vfsStreamContent, string $regex): array
     {
@@ -150,12 +208,12 @@ class MockFilesysFixture
     }
 
     /**
-     * getVfsFilesys
+     * getVfsFileSys
      * @return vfsStreamDirectory
      */
-    public function getVfsFilesys(): vfsStreamDirectory
+    public function getVfsFileSys(): vfsStreamDirectory
     {
-        return $this->vfsFilesys;
+        return $this->vfsFileSys;
     }
 
     /**
@@ -170,53 +228,125 @@ class MockFilesysFixture
     /**
      * changePermissionsOnRootToUnreadable
      */
-    public function changePermissionsOnRootToUnreadable() : void
+    public function changePermissionsOnRootToUnreadable(): void
     {
-        $this->getVfsFilesys()->chmod(0000);
+        $this->getVfsFileSys()->chmod(0000);
     }
 
     /**
-     * getAllFilesFixture
-     * @return string[]
+     * getAllFiles
+     * @return array<string|array<string>>
      */
-    public function getAllFilesFixture(): array
+    public function getAllFiles(): array
     {
-        return $this->allFilesFixture;
+        return $this->allFiles;
     }
 
     /**
-     * getPhpFilesFixture
-     * @return string[]
+     * getPhpFiles
+     * @return array<string|array<string>>
      */
-    public function getPhpFilesFixture(): array
+    public function getPhpFiles(): array
     {
-        return $this->phpFilesFixture;
+        return $this->phpFiles;
     }
 
     /**
-     * getJsFilesFixture
-     * @return string[]
+     * getJsFiles
+     * @return array<string|array<string>>
      */
-    public function getJsFilesFixture(): array
+    public function getJsFiles(): array
     {
-        return $this->jsFilesFixture;
+        return $this->jsFiles;
     }
 
     /**
-     * getCssCsvFilesFixture
-     * @return string[]
+     * getCssCsvFiles
+     * @return array<string|array<string>>
      */
-    public function getCssCsvFilesFixture(): array
+    public function getCssCsvFiles(): array
     {
-        return $this->cssCsvFilesFixture;
+        return $this->cssCsvFiles;
     }
 
     /**
-     * getFilesContainingTheWordThisFixture
-     * @return string[]
+     * getUrlFilesContainingTheWordThis
+     * @return array<string|array<string>>
      */
-    public function getFilesContainingTheWordThisFixture(): array
+    public function getUrlFilesContainingTheWordThis(): array
     {
-        return $this->filesContainingTheWordThisFixture;
+        return $this->urlFilesContainingTheWordThis;
+    }
+
+    /**
+     * @return vfsStreamContent
+     */
+    public function getVfsFile(): vfsStreamContent
+    {
+        return $this->vfsFile;
+    }
+
+    /**
+     * @return vfsStreamContent
+     */
+    public function getVfsDirectory(): vfsStreamContent
+    {
+        return $this->vfsDirectory;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrlFile(): string
+    {
+        return $this->urlFile;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrlFileAdditional(): string
+    {
+        return $this->urlFileAdditional;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrlFileNonExistent(): string
+    {
+        return $this->urlFileNonExistent;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrlDirectoryWithFiles(): string
+    {
+        return $this->urlDirectoryWithFiles;
+    }
+
+    /**
+     * @return int
+     */
+    public function getExpectedNumberOfDirectoryEntriesWithoutDots(): int
+    {
+        return $this->expectedNumberOfDirectoryEntriesWithoutDots;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrlDirectoryEmpty(): string
+    {
+        return $this->urlDirectoryEmpty;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrlDirectoryNonExistent(): string
+    {
+        return $this->urlDirectoryNonExistent;
     }
 }
