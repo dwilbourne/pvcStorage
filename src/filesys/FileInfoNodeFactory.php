@@ -3,18 +3,17 @@
 /**
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
+
 declare(strict_types=1);
 
 namespace pvc\storage\filesys;
 
-use _PHPStan_28dfac80b\Symfony\Component\Finder\SplFileInfo;
-
 /**
- * Class FileInfoFactory
+ * Class FileInfoNodeFactory
  */
-class FileInfoFactory
+class FileInfoNodeFactory
 {
-    protected static FileInfoFactory $instance;
+    protected static FileInfoNodeFactory $instance;
     protected static int $nextNodeId = 0;
 
     protected static function getNextNodeId(): int
@@ -29,18 +28,16 @@ class FileInfoFactory
     {
     }
 
-    public static function getInstance(): FileInfoFactory
+    public static function getInstance(): FileInfoNodeFactory
     {
         if (!isset(self::$instance)) {
-            self::$instance = new FileInfoFactory();
+            self::$instance = new FileInfoNodeFactory();
         }
         return self::$instance;
     }
 
-    public static function makeFileInfo(string $pathName): FileInfo
+    public static function makeFileInfoNode(string $pathName, ?int $parentId): FileInfoNode
     {
-        $fileInfo = new FileInfo(self::getInstance());
-        $fileInfo->hydrate(self::getNextNodeId(), $pathName);
-        return $fileInfo;
+        return new FileInfoNode(self::getNextNodeId(), $parentId, new FileInfo($pathName));
     }
 }

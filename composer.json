@@ -23,7 +23,8 @@
 	"minimum-stability": "dev",
 	"require": {
 		"pvc/interfaces": "*",
-		"pvc/err": "*"
+		"pvc/err": "*",
+		"pvc/struct": "*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^9",

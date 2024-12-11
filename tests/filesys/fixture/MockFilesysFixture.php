@@ -27,6 +27,10 @@ class MockFilesysFixture
      */
     protected string $vfsRoot;
 
+    protected array $allFilesAndDirectories;
+
+    protected array $allFilesAndDirectoriesBreadthFirst;
+
     /**
      * @var string[]
      */
@@ -94,6 +98,58 @@ class MockFilesysFixture
                 ]
             ],
             'fileInRootOfFixture.ini' => 'Maybe this is some kind of a configuration file... or not'
+        ];
+
+        $this->allFilesAndDirectories = [
+            'vfs://root',
+            'vfs://root/Subdir_1',
+            'vfs://root/Subdir_1/AbstractFactory',
+            'vfs://root/Subdir_1/AbstractFactory/test.php',
+            'vfs://root/Subdir_1/AbstractFactory/other.php',
+            'vfs://root/Subdir_1/AbstractFactory/Invalid.csv',
+            'vfs://root/Subdir_1/AbstractFactory/valid.css',
+            'vfs://root/Subdir_1/AnEmptyFolder',
+            'vfs://root/Subdir_1/somecode.php',
+            'vfs://root/Subdir_1/somejavascript.js',
+            'vfs://root/Subdir_2',
+            'vfs://root/Subdir_2/SmallLibrary',
+            'vfs://root/Subdir_2/SmallLibrary/libFile_1.php',
+            'vfs://root/Subdir_2/SmallLibrary/libFile_2.php',
+            'vfs://root/Subdir_2/SmallLibrary/libFile.css',
+            'vfs://root/Subdir_2/SmallLibrary/libFile.js',
+            'vfs://root/Subdir_2/SmallLibrary/libFileDoc.txt',
+            'vfs://root/Subdir_2/SmallLibrary/OtherJSFile.js',
+            'vfs://root/Subdir_2/SmallLibrary/libFile_3.php',
+            'vfs://root/Subdir_2/SmallLibrary/libFile_4.php',
+            'vfs://root/fileInRootOfFixture.ini'
+        ];
+
+        $this->allFilesAndDirectoriesBreadthFirst = [
+            'vfs://root',
+
+            'vfs://root/Subdir_1',
+            'vfs://root/Subdir_2',
+            'vfs://root/fileInRootOfFixture.ini',
+
+            'vfs://root/Subdir_1/AbstractFactory',
+            'vfs://root/Subdir_1/AnEmptyFolder',
+            'vfs://root/Subdir_1/somecode.php',
+            'vfs://root/Subdir_1/somejavascript.js',
+            'vfs://root/Subdir_2/SmallLibrary',
+
+            'vfs://root/Subdir_1/AbstractFactory/test.php',
+            'vfs://root/Subdir_1/AbstractFactory/other.php',
+            'vfs://root/Subdir_1/AbstractFactory/Invalid.csv',
+            'vfs://root/Subdir_1/AbstractFactory/valid.css',
+
+            'vfs://root/Subdir_2/SmallLibrary/libFile_1.php',
+            'vfs://root/Subdir_2/SmallLibrary/libFile_2.php',
+            'vfs://root/Subdir_2/SmallLibrary/libFile.css',
+            'vfs://root/Subdir_2/SmallLibrary/libFile.js',
+            'vfs://root/Subdir_2/SmallLibrary/libFileDoc.txt',
+            'vfs://root/Subdir_2/SmallLibrary/OtherJSFile.js',
+            'vfs://root/Subdir_2/SmallLibrary/libFile_3.php',
+            'vfs://root/Subdir_2/SmallLibrary/libFile_4.php',
         ];
 
         $this->allFiles = [
@@ -231,6 +287,16 @@ class MockFilesysFixture
     public function changePermissionsOnRootToUnreadable(): void
     {
         $this->getVfsFileSys()->chmod(0000);
+    }
+
+    public function getAllFilesAndDirectories(): array
+    {
+        return $this->allFilesAndDirectories;
+    }
+
+    public function getAllFilesAndDirectoriesBreadthFirst(): array
+    {
+        return $this->allFilesAndDirectoriesBreadthFirst;
     }
 
     /**
