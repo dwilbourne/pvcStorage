@@ -4,9 +4,10 @@
  * @version 1.0
  */
 
-namespace tests\filesys;
+namespace pvcTests\storage\filesys\file_access;
 
 use pvc\storage\filesys\err\FileAccessExceptionMsg;
+use tests\filesys\FileAccessTestCase;
 
 /**
  * @runInSeparateProcess
@@ -16,7 +17,7 @@ use pvc\storage\filesys\err\FileAccessExceptionMsg;
 include("ScanDirReturnsFalse.php");
 
 /**
- * @covers \pvc\storage\filesys\FileAccess
+ * @covers \pvc\storage\filesys\file_access\FileAccess
  */
 class FileAccessTestScandirReturnsFalse extends FileAccessTestCase
 {

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace pvc\storage\filesys;
+namespace pvc\storage\filesys\file_access;
 
 use Error;
 use pvc\interfaces\msg\MsgInterface;
@@ -325,7 +325,7 @@ class FileAccess implements FileAccessInterface
      * @param string $dirName
      * @param bool $withDots
      * @return array|false
-     * @throws \pvc\storage\err\FileAccessException
+     * @throws FileAccessException
      */
     public function directoryGetContents(string $dirName, bool $withDots = false, int $sortOrder =
     SCANDIR_SORT_ASCENDING): array|false
@@ -347,7 +347,7 @@ class FileAccess implements FileAccessInterface
      * fileGetContents
      * @param string $fileName
      * @return string|false
-     * @throws \pvc\storage\err\FileGetContentsException
+     * @throws FileGetContentsException
      */
     public function fileGetContents(string $fileName): string|false
     {
@@ -364,7 +364,7 @@ class FileAccess implements FileAccessInterface
      * @param string $fileName
      * @param string $data
      * @return bool
-     * @throws \pvc\storage\err\FileGetContentsException
+     * @throws FileGetContentsException
      */
     public function filePutContents(string $fileName, string $data): int|false
     {
@@ -445,7 +445,7 @@ class FileAccess implements FileAccessInterface
     /**
      * eof
      * @return bool
-     * @throws \pvc\storage\err\FileAccessException
+     * @throws FileAccessException
      */
     public function eof(): bool
     {

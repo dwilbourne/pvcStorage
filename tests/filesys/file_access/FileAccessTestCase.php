@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace pvcTests\storage\filesys;
+namespace pvcTests\storage\filesys\file_access;
 
 use org\bovigo\vfs\vfsStreamContent;
 use PHPUnit\Framework\TestCase;

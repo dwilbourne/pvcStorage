@@ -5,11 +5,11 @@
  */
 declare (strict_types=1);
 
-namespace pvcTests\storage\filesys;
+namespace pvcTests\storage\filesys\file_tree;
 
 use PHPUnit\Framework\TestCase;
-use pvc\storage\filesys\FileInfoNode;
-use pvc\storage\filesys\FileInfoTree;
+use pvc\storage\filesys\filetree\FileInfoNode;
+use pvc\storage\filesys\filetree\FileInfoTree;
 use pvc\struct\tree\search\SearchBreadthFirst;
 use pvcTests\storage\filesys\fixture\MockFilesysFixture;
 

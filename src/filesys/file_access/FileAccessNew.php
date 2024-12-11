@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace pvc\storage\filesys;
+namespace pvc\storage\filesys\file_access;
 
 use pvc\err\ErrorHandler;
 use pvc\err\stock\ErrorException;

@@ -5,7 +5,7 @@
  */
 declare (strict_types=1);
 
-namespace pvcTests\storage\filesys;
+namespace pvcTests\storage\filesys\file_access;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -13,7 +13,7 @@ use pvc\err\ErrorHandler;
 use pvc\interfaces\msg\MsgInterface;
 use pvc\storage\err\InvalidFileModeException;
 use pvc\storage\err\OpenFileException;
-use pvc\storage\filesys\FileAccessNew;
+use pvc\storage\filesys\file_access\FileAccessNew;
 use pvcTests\storage\filesys\fixture\MockFilesysFixture;
 
 class FileAccessNewTest extends TestCase
@@ -52,7 +52,7 @@ class FileAccessNewTest extends TestCase
     /**
      * testOpenFileFailsWhenPermissionsAreInsufficient
      * @throws OpenFileException
-     * @covers \pvc\storage\filesys\FileAccess::openFile
+     * @covers \pvc\storage\filesys\file_access\FileAccess::openFile
      *
      * fopen raises a warning even for something simple like not having the right permissions to open the file
      */

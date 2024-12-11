@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace pvcTests\storage\filesys;
+namespace pvcTests\storage\filesys\file_access;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -16,11 +16,12 @@ use pvc\storage\err\FileHandleException;
 use pvc\storage\err\InvalidFileModeException;
 use pvc\storage\err\InvalidReadLengthException;
 use pvc\storage\err\OpenFileException;
-use pvc\storage\filesys\FileAccess;
+use pvc\storage\filesys\file_access\FileAccess;
+use pvcTests\storage\filesys\FileAccessExceptionMsg;
 use pvcTests\storage\filesys\fixture\MockFilesysFixture;
 
 /**
- * @covers \pvc\storage\filesys\FileAccess
+ * @covers FileAccess
  */
 class FileAccessTest extends TestCase
 {
@@ -310,7 +311,7 @@ class FileAccessTest extends TestCase
 
     /**
      * testGetDirectoryContentsReturnsEmptyArrayForEmptyDirectory
-     * @throws \pvc\storage\err\FileAccessException
+     * @throws FileAccessException
      */
     public function testGetDirectoryContentsReturnsEmptyArrayForEmptyDirectory(): void
     {
@@ -447,7 +448,7 @@ class FileAccessTest extends TestCase
     /**
      * testReadFileSucceedsAndEOFIsTrue
      * @throws FileAccessException
-     * @throws \pvc\storage\err\FileHandleException
+     * @throws FileHandleException
      * @throws InvalidReadLengthException
      * @throws OpenFileException
      * @covers \pvc\storage\filesys\FileAccess::readFile
@@ -464,10 +465,10 @@ class FileAccessTest extends TestCase
 
     /**
      * testReadFileSucceedsWithMultipleReads
-     * @throws \pvc\storage\err\FileAccessException
+     * @throws FileAccessException
      * @throws FileHandleException
      * @throws InvalidReadLengthException
-     * @throws \pvc\storage\err\OpenFileException
+     * @throws OpenFileException
      * @covers \pvc\storage\filesys\FileAccess::readFile
      */
     public function testReadFileSucceedsWithMultipleReads(): void
@@ -507,7 +508,7 @@ class FileAccessTest extends TestCase
 
     /**
      * testWriteFileFailsWhenFileIsNotWriteable
-     * @throws \pvc\storage\err\FileHandleException
+     * @throws FileHandleException
      * @throws OpenFileException
      * @covers \pvc\storage\filesys\FileAccess::writeFile
      */

@@ -6,9 +6,10 @@
 
 declare(strict_types=1);
 
-namespace pvc\storage\filesys;
+namespace pvc\storage\filesys\filetree;
 
 use pvc\interfaces\struct\tree\search\NodeSearchableInterface;
+use pvc\storage\filesys\FileInfo;
 use pvc\struct\tree\dto\TreenodeDTOUnordered;
 
 /**
