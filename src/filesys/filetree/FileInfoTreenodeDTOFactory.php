@@ -11,6 +11,8 @@ namespace pvc\storage\filesys\filetree;
 use pvc\interfaces\storage\filesys\FileInfoFactoryInterface;
 use pvc\interfaces\struct\tree\search\SearchInterface;
 use pvc\storage\err\FilePathDoesNotExistException;
+use pvc\storage\filesys\FileInfoFactory;
+use pvc\struct\tree\search\SearchBreadthFirst;
 
 /**
  * Class FileInfoTreenodeDTOFactory
@@ -20,6 +22,8 @@ class FileInfoTreenodeDTOFactory
     protected static FileInfoTreenodeDTOFactory $instance;
 
     protected static FileInfoFactoryInterface $fileInfoFactory;
+
+    protected static SearchInterface $search;
 
     protected static int $nextNodeId = 0;
 
@@ -44,6 +48,11 @@ class FileInfoTreenodeDTOFactory
         self::$fileInfoFactory = $fileInfoFactory;
     }
 
+    public static function setSearch(SearchInterface $search): void
+    {
+        self::$search = $search;
+    }
+
     public static function getInstance(): FileInfoTreenodeDTOFactory
     {
         if (!isset(self::$instance)) {
@@ -55,14 +64,13 @@ class FileInfoTreenodeDTOFactory
     public static function makeFileInfoNode(
         string $pathName,
         ?int $parentId,
-        FileInfoFactoryInterface $fileInfoFactory,
     ): FileInfoTreenodeDTO {
-        $fileInfoDTO = new FileInfoTreenodeDTO($fileInfoFactory);
+        $fileInfoDTO = new FileInfoTreenodeDTO(self::$fileInfoFactory ?? new FileInfoFactory());
         $array = [
             'nodeId' => self::getNextNodeId(),
             'parentId' => $parentId,
             'treeId' => null,
-            'payload' => $fileInfoFactory->makeFileInfo($pathName),
+            'payload' => self::$fileInfoFactory->makeFileInfo($pathName),
         ];
         $fileInfoDTO->hydrateFromArray($array);
         return $fileInfoDTO;
@@ -75,13 +83,14 @@ class FileInfoTreenodeDTOFactory
      * @return array
      * @throws FilePathDoesNotExistException
      */
-    public static function findFiles(string $dir, SearchInterface $search): array
+    public static function findFiles(string $dir): array
     {
         if (!is_dir($dir)) {
             throw new FilePathDoesNotExistException($dir);
         }
 
-        $fileInfo = self::makeFileInfoNode($dir, null, self::$fileInfoFactory);
+        $fileInfo = self::makeFileInfoNode($dir, null);
+        $search = self::$search ?? new SearchBreadthFirst();
         $search->setStartNode($fileInfo);
         return $search->getNodes();
     }
