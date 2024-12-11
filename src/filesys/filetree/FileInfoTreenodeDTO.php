@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace pvc\storage\filesys\filetree;
 
+use pvc\interfaces\storage\filesys\FileInfoFactoryInterface;
 use pvc\interfaces\storage\filesys\FileInfoInterface;
 use pvc\interfaces\struct\collection\CollectionUnorderedInterface;
 use pvc\interfaces\struct\tree\dto\TreenodeDTOUnorderedInterface;
@@ -32,7 +33,22 @@ readonly class FileInfoTreenodeDTO implements TreenodeDTOUnorderedInterface, Nod
      * the tree to which the node belongs.
      */
     public ?int $treeId;
+
+    /**
+     * @var FileInfoInterface
+     */
     public mixed $payload;
+
+    /**
+     * @var FileInfoFactoryInterface
+     * used to generate the children array in order to implement NodeSearchable interface
+     */
+    protected FileInfoFactoryInterface $fileInfoFactory;
+
+    public function __construct($fileInfoFactory)
+    {
+        $this->fileInfoFactory = $fileInfoFactory;
+    }
 
     /**
      * hydrateFromNode
@@ -45,17 +61,6 @@ readonly class FileInfoTreenodeDTO implements TreenodeDTOUnorderedInterface, Nod
         $this->parentId = $node->getParentId();
         $this->treeId = $node->getTreeId();
         $this->payload = $node->getPayload();
-    }
-
-    public function __construct(int $nodeId, ?int $parentId, FileInfoInterface $fileInfo)
-    {
-        $array = [
-            'nodeId' => $nodeId,
-            'parentId' => $parentId,
-            'treeId' => null,
-            'payload' => $fileInfo,
-        ];
-        $this->hydrateFromArray($array);
     }
 
     /**
@@ -75,7 +80,7 @@ readonly class FileInfoTreenodeDTO implements TreenodeDTOUnorderedInterface, Nod
             $fileNames = array_diff(scandir($this->getPathName(), SCANDIR_SORT_NONE), ['.', '..']);
             $filePaths = array_map([$this, 'makeFullPath'], $fileNames);
             foreach ($filePaths as $filePath) {
-                $result[] = FileInfoTreenodeDTOFactory::makeFileInfoNode($filePath, $this->nodeId);
+                $result[] = FileInfoTreenodeDTOFactory::makeFileInfoNode($filePath, $this->nodeId, $this->fileInfoFactory);
             }
         }
         return $result;

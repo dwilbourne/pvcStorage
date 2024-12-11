@@ -31,9 +31,7 @@ class FileInfoTreenodeDTOFactory
     /**
      * make this object a singleton
      */
-    protected function __construct()
-    {
-    }
+    protected function __construct() {}
 
     /**
      * setFileInfofactory
@@ -57,9 +55,17 @@ class FileInfoTreenodeDTOFactory
     public static function makeFileInfoNode(
         string $pathName,
         ?int $parentId,
-        FileInfoFactoryInterface $fileInfoFactory
+        FileInfoFactoryInterface $fileInfoFactory,
     ): FileInfoTreenodeDTO {
-        return new FileInfoTreenodeDTO(self::getNextNodeId(), $parentId, $fileInfoFactory->makeFileInfo($pathName));
+        $fileInfoDTO = new FileInfoTreenodeDTO($fileInfoFactory);
+        $array = [
+            'nodeId' => self::getNextNodeId(),
+            'parentId' => $parentId,
+            'treeId' => null,
+            'payload' => $fileInfoFactory->makeFileInfo($pathName),
+        ];
+        $fileInfoDTO->hydrateFromArray($array);
+        return $fileInfoDTO;
     }
 
     /**
