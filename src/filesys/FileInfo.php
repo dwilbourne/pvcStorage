@@ -7,12 +7,13 @@ declare(strict_types=1);
 
 namespace pvc\storage\filesys;
 
+use pvc\interfaces\storage\filesys\FileInfoInterface;
 use SplFileInfo;
 
 /**
  * Class FileInfo
  */
-class FileInfo
+class FileInfo implements FileInfoInterface
 {
     protected SplFileInfo $splFileInfo;
 
@@ -21,7 +22,7 @@ class FileInfo
         $this->splFileInfo = new SplFileInfo($pathName);
     }
 
-    public function getPathName(): string
+    public function getFilePath(): string
     {
         return $this->splFileInfo->getPathname();
     }
