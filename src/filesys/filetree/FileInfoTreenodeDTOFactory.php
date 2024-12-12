@@ -11,6 +11,7 @@ namespace pvc\storage\filesys\filetree;
 use pvc\interfaces\storage\filesys\FileInfoFactoryInterface;
 use pvc\interfaces\struct\tree\search\SearchInterface;
 use pvc\storage\err\FilePathDoesNotExistException;
+use pvc\storage\filesys\FileInfo;
 use pvc\storage\filesys\FileInfoFactory;
 use pvc\struct\tree\search\SearchBreadthFirst;
 
@@ -33,21 +34,30 @@ class FileInfoTreenodeDTOFactory
     }
 
     /**
-     * make this object a singleton
+     * make this object a singleton becausse it requires configuration and it would be easy to forget to configure it
+     * with multiple instances.  The default payload is the FileInfo object in this library (which is a facade for
+     * SplFileInfo), but your project might need some other kind of file-based payload.
+     * require
      */
-    protected function __construct() {}
+    protected function __construct()
+    {
+    }
 
     /**
-     * setFileInfofactory
+     * setFileInfoFactory
      * @param FileInfoFactoryInterface $fileInfoFactory
      * do not like to do this but because it's a singleton we cannot put this dependency in the constructor.  So this
      * object should be created with setter injection in order to ensure valid state.
      */
-    public static function setFileInfofactory(FileInfoFactoryInterface $fileInfoFactory): void
+    public static function setFileInfoFactory(FileInfoFactoryInterface $fileInfoFactory): void
     {
         self::$fileInfoFactory = $fileInfoFactory;
     }
 
+    /**
+     * setSearch
+     * @param SearchInterface<FileInfo> $search
+     */
     public static function setSearch(SearchInterface $search): void
     {
         self::$search = $search;
@@ -61,7 +71,7 @@ class FileInfoTreenodeDTOFactory
         return self::$instance;
     }
 
-    public static function makeFileInfoNode(
+    public static function makeFileInfoTreenodeDTO(
         string $pathName,
         ?int $parentId,
     ): FileInfoTreenodeDTO {
@@ -80,7 +90,7 @@ class FileInfoTreenodeDTOFactory
      * findFiles
      * @param string $dir
      * @param SearchInterface<FileInfoTreenodeDTO> $search
-     * @return array
+     * @return array<FileInfoTreenodeDTO>
      * @throws FilePathDoesNotExistException
      */
     public static function findFiles(string $dir): array
@@ -89,7 +99,7 @@ class FileInfoTreenodeDTOFactory
             throw new FilePathDoesNotExistException($dir);
         }
 
-        $fileInfo = self::makeFileInfoNode($dir, null);
+        $fileInfo = self::makeFileInfoTreenodeDTO($dir, null);
         $search = self::$search ?? new SearchBreadthFirst();
         $search->setStartNode($fileInfo);
         return $search->getNodes();

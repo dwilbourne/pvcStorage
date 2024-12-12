@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace pvc\storage\filesys\filetree;
 
-use Override;
 use pvc\interfaces\struct\payload\PayloadTesterInterface;
 use pvc\storage\filesys\FileInfo;
 
@@ -16,8 +15,12 @@ use pvc\storage\filesys\FileInfo;
  */
 class FileEntryPayloadTester implements PayloadTesterInterface
 {
-
-    #[Override] public function testValue(mixed $value): bool
+    /**
+     * testValue
+     * @param mixed $value
+     * @return bool
+     */
+    public function testValue(mixed $value): bool
     {
         return ($value instanceof FileInfo);
     }
