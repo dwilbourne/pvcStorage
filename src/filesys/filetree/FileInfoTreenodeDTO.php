@@ -80,7 +80,7 @@ readonly class FileInfoTreenodeDTO implements TreenodeDTOUnorderedInterface, Nod
             $fileNames = array_diff(scandir($this->getPathName(), SCANDIR_SORT_NONE), ['.', '..']);
             $filePaths = array_map([$this, 'makeFullPath'], $fileNames);
             foreach ($filePaths as $filePath) {
-                $result[] = FileInfoTreenodeDTOFactory::makeFileInfoNode($filePath, $this->nodeId, $this->fileInfoFactory);
+                $result[] = FileInfoTreenodeDTOFactory::makeFileInfoTreenodeDTO($filePath, $this->nodeId);
             }
         }
         return $result;
