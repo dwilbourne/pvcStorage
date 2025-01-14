@@ -11,8 +11,6 @@ namespace pvc\storage\filesys\filetree;
 use pvc\interfaces\storage\filesys\FileInfoFactoryInterface;
 use pvc\interfaces\struct\tree\search\SearchInterface;
 use pvc\storage\err\FilePathDoesNotExistException;
-use pvc\storage\filesys\FileInfo;
-use pvc\storage\filesys\FileInfoFactory;
 use pvc\struct\tree\search\SearchBreadthFirst;
 
 /**

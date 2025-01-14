@@ -8,7 +8,7 @@ declare (strict_types=1);
 namespace pvcTests\storage\filesys\file_tree;
 
 use PHPUnit\Framework\TestCase;
-use pvc\storage\filesys\FileInfoFactory;
+use pvc\storage\filesys\filetree\FileInfoFactory;
 use pvc\storage\filesys\filetree\FileInfoTreenodeDTO;
 use pvc\storage\filesys\filetree\FileInfoTreenodeDTOFactory;
 use pvc\struct\tree\search\SearchBreadthFirst;

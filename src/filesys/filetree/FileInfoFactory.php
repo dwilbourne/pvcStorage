@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace pvc\storage\filesys;
+namespace pvc\storage\filesys\filetree;
 
 use pvc\interfaces\storage\filesys\FileInfoFactoryInterface;
 

@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace pvc\storage\filesys\filetree;
 
 use pvc\interfaces\struct\payload\PayloadTesterInterface;
-use pvc\storage\filesys\FileInfo;
 
 /**
  * Class FileEntryPayloadTester
