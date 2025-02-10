@@ -16,7 +16,7 @@ use pvc\interfaces\struct\tree\node\TreenodeAbstractInterface;
 use pvc\interfaces\struct\tree\node\TreenodeUnorderedInterface;
 use pvc\interfaces\struct\tree\search\NodeSearchableInterface;
 use pvc\interfaces\struct\tree\tree\TreeUnorderedInterface;
-use pvc\storage\dto\DTOTrait;
+use pvc\struct\dto\DTOTrait;
 
 /**
  * Class FileInfoTreenodeDTO

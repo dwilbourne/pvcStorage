@@ -38,9 +38,6 @@ class _StorageXData extends XDataAbstract
             InsufficientFileModeException::class => 1001,
             UnsetFileNameException::class => 1001,
             FileInfoException::class => 1001,
-            DTOInvalidPropertyValueException::class => 1017,
-            DTOMissingPropertyException::class => 1021,
-            DTOExtraPropertyException::class => 1025,
 
         ];
     }
@@ -63,9 +60,6 @@ class _StorageXData extends XDataAbstract
             InsufficientFileModeException::class => 'file does not exist and mode ${mode} is not sufficcient to create the file.',
             UnsetFileNameException::class => 'file name has not yet been set on this object',
             FileInfoException::class => 'unable to obtain the requested file information for ${$filename}.',
-            DTOInvalidPropertyValueException::class => 'DTO ${className} error - cannot assign value ${value} to property ${propertyName}',
-            DTOMissingPropertyException::class => 'DTO ${className} constructor is missing the following properties: [${missingPropertyNames}].',
-            DTOExtraPropertyException::class => 'DTO ${className} constructor was passed an extra property [${extraPropertyName}]',
         ];
     }
 }
