@@ -10,7 +10,7 @@ namespace pvcTests\storage\filesys\file_access;
 
 use org\bovigo\vfs\vfsStreamContent;
 use PHPUnit\Framework\TestCase;
-use pvcTests\storage\filesys\fixture\MockFilesysFixture;
+use pvcTests\storage\filesys\file_access\fixture\MockFilesysFixture;
 
 /**
  * Class FileAccessTestCase

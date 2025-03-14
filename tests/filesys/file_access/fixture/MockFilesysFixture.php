@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace pvcTests\storage\filesys\fixture;
+namespace pvcTests\storage\filesys\file_access\fixture;
 
 use bovigo\vfs\vfsStream;
 use bovigo\vfs\vfsStreamContent;

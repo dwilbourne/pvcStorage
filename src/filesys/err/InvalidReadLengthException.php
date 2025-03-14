@@ -5,13 +5,13 @@
  */
 declare(strict_types=1);
 
-namespace pvc\storage\err;
+namespace pvc\storage\filesys\err;
 
 use pvc\err\stock\LogicException;
 
 /**
- * Class InvalidSortOrderException
+ * Class InvalidReadLengthException
  */
-class InvalidSortOrderException extends LogicException
+class InvalidReadLengthException extends LogicException
 {
 }

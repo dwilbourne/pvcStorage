@@ -6,10 +6,9 @@
 
 namespace pvcTests\storage\filesys\file_access;
 
-use pvc\storage\err\FileAccessException;
+use pvc\storage\filesys\err\FileAccessException;
 use pvc\storage\filesys\err\FileAccessExceptionMsg;
 use tests\filesys\FileAccessTestCase;
-
 use function tests\filesys\uopz_set_return;
 use function tests\filesys\uopz_unset_return;
 

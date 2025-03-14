@@ -11,10 +11,10 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use pvc\err\ErrorHandler;
 use pvc\interfaces\msg\MsgInterface;
-use pvc\storage\err\InvalidFileModeException;
-use pvc\storage\err\OpenFileException;
+use pvc\storage\filesys\err\InvalidFileModeException;
+use pvc\storage\filesys\err\OpenFileException;
 use pvc\storage\filesys\file_access\FileAccessNew;
-use pvcTests\storage\filesys\fixture\MockFilesysFixture;
+use pvcTests\storage\filesys\file_access\fixture\MockFilesysFixture;
 
 class FileAccessNewTest extends TestCase
 {

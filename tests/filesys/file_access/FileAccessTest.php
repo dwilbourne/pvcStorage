@@ -11,14 +11,14 @@ namespace pvcTests\storage\filesys\file_access;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use pvc\interfaces\msg\MsgInterface;
-use pvc\storage\err\FileAccessException;
-use pvc\storage\err\FileHandleException;
-use pvc\storage\err\InvalidFileModeException;
-use pvc\storage\err\InvalidReadLengthException;
-use pvc\storage\err\OpenFileException;
+use pvc\storage\filesys\err\FileAccessException;
+use pvc\storage\filesys\err\FileHandleException;
+use pvc\storage\filesys\err\InvalidFileModeException;
+use pvc\storage\filesys\err\InvalidReadLengthException;
+use pvc\storage\filesys\err\OpenFileException;
 use pvc\storage\filesys\file_access\FileAccess;
+use pvcTests\storage\filesys\file_access\fixture\MockFilesysFixture;
 use pvcTests\storage\filesys\FileAccessExceptionMsg;
-use pvcTests\storage\filesys\fixture\MockFilesysFixture;
 
 /**
  * @covers FileAccess

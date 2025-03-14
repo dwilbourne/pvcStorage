@@ -5,7 +5,7 @@ declare(strict_types=1);
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
-namespace pvc\storage\messages;
+namespace pvc\storage\filesys\messages;
 
 use pvc\msg\Msg;
 

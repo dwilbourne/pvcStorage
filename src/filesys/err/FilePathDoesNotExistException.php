@@ -5,7 +5,7 @@
 
 declare(strict_types = 1);
 
-namespace pvc\storage\err;
+namespace pvc\storage\filesys\err;
 
 use pvc\err\stock\LogicException;
 use Throwable;
@@ -15,8 +15,8 @@ use Throwable;
  */
 class FilePathDoesNotExistException extends LogicException
 {
-    public function __construct(string $dirName, Throwable $prev = null)
+    public function __construct(string $filePath, Throwable $prev = null)
     {
-        parent::__construct($dirName, $prev);
+        parent::__construct($filePath, $prev);
     }
 }
