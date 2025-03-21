@@ -11,9 +11,9 @@ use pvc\err\stock\LogicException;
 use Throwable;
 
 /**
- * Class FilePathDoesNotExistException
+ * Class FileDoesNotExistException
  */
-class FilePathDoesNotExistException extends LogicException
+class FileDoesNotExistException extends LogicException
 {
     public function __construct(string $filePath, Throwable $prev = null)
     {

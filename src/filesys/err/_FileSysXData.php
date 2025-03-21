@@ -21,7 +21,7 @@ class _FileSysXData extends XDataAbstract
     {
         return [
             FileNotReadableException::class=> 1001,
-            FilePathDoesNotExistException::class => 1002,
+            FileDoesNotExistException::class => 1002,
         ];
     }
 
@@ -29,7 +29,7 @@ class _FileSysXData extends XDataAbstract
     {
         return [
             FileNotReadableException::class => '${filePath} is not readable',
-            FilePathDoesNotExistException::class => '${filePath} is not a valid file or directory name',
+            FileDoesNotExistException::class => '${filePath} is not a valid file or directory name',
         ];
     }
 }
