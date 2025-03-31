@@ -3,7 +3,7 @@
  * @author: Doug Wilbourne (dougwilbourne@gmail.com)
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace pvc\storage\filesys\err;
 
@@ -15,7 +15,7 @@ use Throwable;
  */
 class FileDoesNotExistException extends LogicException
 {
-    public function __construct(string $filePath, Throwable $prev = null)
+    public function __construct(string $filePath, ?Throwable $prev = null)
     {
         parent::__construct($filePath, $prev);
     }

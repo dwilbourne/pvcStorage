@@ -22,6 +22,10 @@ class _FileSysXDataTest extends XDataTestMaster
      * @covers \pvc\storage\filesys\err\_FileSysXData::getLocalXCodes
      * @covers \pvc\storage\filesys\err\FileDoesNotExistException
      * @covers \pvc\storage\filesys\err\FileNotReadableException
+     * @covers \pvc\storage\filesys\err\FileOpenException
+     * @covers \pvc\storage\filesys\err\InvalidFileHandleException
+     * @covers \pvc\storage\filesys\err\InvalidFileModeException
+     * @covers \pvc\storage\filesys\err\InvalidFileNameException
      */
     public function testPvcRegexExceptionLibrary(): void
     {

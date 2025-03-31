@@ -9,7 +9,7 @@ use Throwable;
 
 class FileNotReadableException extends RuntimeException
 {
-    public function __construct(string $filePath, Throwable $prev = null)
+    public function __construct(string $filePath, ?Throwable $prev = null)
     {
         parent::__construct($filePath, $prev);
     }
