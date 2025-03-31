@@ -2,8 +2,10 @@
 
 namespace pvcTests\storage\filesys;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
 use pvc\storage\filesys\err\FileDoesNotExistException;
+use pvc\storage\filesys\err\FileGetContentsException;
 use pvc\storage\filesys\err\FileNotReadableException;
 use pvc\storage\filesys\err\FileOpenException;
 use pvc\storage\filesys\err\InvalidFileHandleException;
@@ -49,7 +51,7 @@ class FileTest extends TestCase
      * @return void
      * @throws FileDoesNotExistException
      * @throws FileNotReadableException
-     * @covers File::open
+     * @covers \pvc\storage\filesys\File::open
      */
     public function testOpenFailsWithInvalidFileMode(): void
     {
@@ -177,4 +179,107 @@ class FileTest extends TestCase
     {
         $this->fixture = new MockFilesysFixture();
     }
+
+    /**
+     * @return void
+     * @throws FileDoesNotExistException
+     * @throws FileNotReadableException
+     * @throws FileGetContentsException
+     * @covers \pvc\storage\filesys\File::getContents
+     */
+    public function testGetContentsFailsIfFileDoesNotExist(): void
+    {
+        $nonExistentFile = 'someBadFile.txt';
+        self::expectException(FileDoesNotExistException::class);
+        $contents = File::getContents($nonExistentFile);
+        unset($contents);
+    }
+
+    /**
+     * @return void
+     * @throws FileDoesNotExistException
+     * @throws FileNotReadableException
+     * @throws FileGetContentsException
+     * @covers \pvc\storage\filesys\File::getContents
+     */
+    public function testGetContentsFailsIfFileExistsButIsNotReadable(): void
+    {
+        $testFile = $this->fixture->getUrlFile();
+        /**
+         * allow only write permissions to the file
+         */
+        chmod($testFile, '0222');
+        self::expectException(FileNotReadableException::class);
+        $contents = File::getContents($testFile);
+        unset($contents);
+    }
+
+    /**
+     * @return void
+     * @throws FileDoesNotExistException
+     * @throws FileNotReadableException
+     * @throws FileGetContentsException
+     * @covers \pvc\storage\filesys\File::getContents
+     */
+    public function testGetContentsSucceeds(): void
+    {
+        $testFile = $this->fixture->getUrlFile();
+        $contents = File::getContents($testFile);
+        self::assertTrue(is_string($contents));
+    }
+
+    /**
+     * @return void
+     * @covers \pvc\storage\filesys\File::getContents
+     * @runInSeparateProcess
+     */
+    public function testGetContentsFailsIfVerbReturnsFalse(): void
+    {
+        $testFile = $this->fixture->getUrlFile();
+        /**
+         * exception processing requires is_readable and file_get_contents to work normally, so need a closure to
+         * restrict the result to the test case
+         */
+        $callback = function (string $filePath) use ($testFile) {
+            if ($filePath === $testFile) {
+                return false;
+            } else {
+                return file_get_contents($filePath);
+            }
+        };
+        uopz_set_return('file_get_contents', $callback, true);
+        self::expectException(FileGetContentsException::class);
+        $contents = File::getContents($testFile);
+        unset($contents);
+        uopz_unset_return('file_get_contents');
+    }
+
+    /**
+     * @return void
+     * @throws FileDoesNotExistException
+     * @throws FileGetContentsException
+     * @throws FileNotReadableException
+     * @covers \pvc\storage\filesys\File::getContents
+     */
+    public function testGetContentsFailsIfVerbErrors(): void
+    {
+        $testFile = $this->fixture->getUrlFile();
+        /**
+         * exception processing requires is_readable and file_get_contents to work normally, so need a closure to
+         * restrict the result to the test case
+         */
+        $callback = function (string $filePath) use ($testFile) {
+            if ($filePath === $testFile) {
+                throw new Exception('runtime exception');
+            } else {
+                return file_get_contents($filePath);
+            }
+        };
+        uopz_set_return('file_get_contents', $callback, true);
+        self::expectException(FileGetContentsException::class);
+        $contents = File::getContents($testFile);
+        unset($contents);
+        uopz_unset_return('file_get_contents');
+    }
+
 }

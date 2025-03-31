@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace pvc\storage\filesys;
 
 use pvc\storage\filesys\err\FileDoesNotExistException;
+use pvc\storage\filesys\err\FileGetContentsException;
 use pvc\storage\filesys\err\FileNotReadableException;
 use pvc\storage\filesys\err\FileOpenException;
 use pvc\storage\filesys\err\InvalidFileHandleException;
@@ -80,5 +81,31 @@ class File
             throw new InvalidFileHandleException();
         }
         fclose($handle);
+    }
+
+    /**
+     * @param string $filePath
+     * @return string
+     * @throws FileDoesNotExistException
+     * @throws FileGetContentsException
+     * @throws FileNotReadableException
+     */
+    public static function getContents(string $filePath): string
+    {
+        if (!file_exists($filePath)) {
+            throw new FileDoesNotExistException($filePath);
+        }
+        if (!is_readable($filePath)) {
+            throw new FileNotReadableException($filePath);
+        }
+        try {
+            $contents = file_get_contents($filePath);
+        } catch (Throwable $e) {
+            throw new FileGetContentsException($filePath, $e);
+        }
+        if ($contents === false) {
+            throw new FileGetContentsException($filePath);
+        }
+        return $contents;
     }
 }

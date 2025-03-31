@@ -27,11 +27,12 @@ class _FileSysXData extends XDataAbstract implements XDataInterface
     {
         return [
             FileDoesNotExistException::class => 1000,
-            FileNotReadableException::class => 1001,
-            FileOpenException::class => 1002,
-            InvalidFileHandleException::class => 1003,
-            InvalidFileModeException::class => 1004,
-            InvalidFileNameException::class => 1005,
+            FileGetContentsException::class => 1001,
+            FileNotReadableException::class => 1002,
+            FileOpenException::class => 1003,
+            InvalidFileHandleException::class => 1004,
+            InvalidFileModeException::class => 1005,
+            InvalidFileNameException::class => 1006,
         ];
     }
 
@@ -43,6 +44,7 @@ class _FileSysXData extends XDataAbstract implements XDataInterface
     {
         return [
             FileDoesNotExistException::class => 'File ${filePath} does not exist.',
+            FileGetContentsException::class => 'File ${filePath} exists and is readable but get_file_contents failed.',
             FileNotReadableException::class => 'File ${filePath} is not readable.',
             FileOpenException::class => 'File ${filePath} exists cannot be opened in mode ${mode}.',
             InvalidFileHandleException::class => 'Resource is not a handle to a stream resource.',
