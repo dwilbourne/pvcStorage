@@ -35,6 +35,9 @@ class File
      */
     public static function mustBeReadable(string $filePath): true
     {
+        if (!file_exists($filePath)) {
+            throw new FileDoesNotExistException($filePath);
+        }
         if (!is_readable($filePath)) {
             throw new FileNotReadableException($filePath);
         }
@@ -51,7 +54,6 @@ class File
      */
     public static function openReadOnly(string $filePath)
     {
-        self::mustExist($filePath);
         self::mustBeReadable($filePath);
         return self::open($filePath, FileMode::READ);
     }
@@ -112,7 +114,6 @@ class File
      */
     public static function getContents(string $filePath): string
     {
-        self::mustExist($filePath);
         self::mustBeReadable($filePath);
         try {
             $contents = file_get_contents($filePath);

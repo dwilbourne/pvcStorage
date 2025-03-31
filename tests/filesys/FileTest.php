@@ -54,6 +54,18 @@ class FileTest extends TestCase
      * @throws FileNotReadableException
      * @covers \pvc\storage\filesys\File::mustBeReadable
      */
+    public function testFileMustExistInOrderToBeReadable(): void
+    {
+        $nonExistentFile = 'someBadFile.txt';
+        $this->expectException(FileDoesNotExistException::class);
+        File::mustBeReadable($nonExistentFile);
+    }
+
+    /**
+     * @return void
+     * @throws FileNotReadableException
+     * @covers \pvc\storage\filesys\File::mustBeReadable
+     */
     public function testFileMustBeReadableFailsWhenFileIsNotReadable(): void
     {
         $testFile = $this->fixture->getUrlFile();
