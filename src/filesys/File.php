@@ -17,6 +17,33 @@ class File
 {
     /**
      * @param string $filePath
+     * @return void
+     * @throws FileDoesNotExistException
+     */
+    public static function mustExist(string $filePath): true
+    {
+        if (!file_exists($filePath)) {
+            throw new FileDoesNotExistException($filePath);
+        }
+        return true;
+    }
+
+    /**
+     * @param string $filePath
+     * @return void
+     * @throws FileNotReadableException
+     */
+    public static function mustBeReadable(string $filePath): true
+    {
+        if (!is_readable($filePath)) {
+            throw new FileNotReadableException($filePath);
+        }
+        return true;
+    }
+
+
+    /**
+     * @param string $filePath
      * @return false|resource
      * @throws FileDoesNotExistException
      * @throws FileNotReadableException
@@ -24,12 +51,8 @@ class File
      */
     public static function openReadOnly(string $filePath)
     {
-        if (!file_exists($filePath)) {
-            throw new FileDoesNotExistException($filePath);
-        }
-        if (!is_readable($filePath)) {
-            throw new FileNotReadableException($filePath);
-        }
+        self::mustExist($filePath);
+        self::mustBeReadable($filePath);
         return self::open($filePath, FileMode::READ);
     }
 
@@ -42,9 +65,6 @@ class File
      */
     public static function open(string $filePath, string $mode = 'r')
     {
-        if (!file_exists($filePath)) {
-            throw new FileDoesNotExistException($filePath);
-        }
         if (!FileMode::isDefined($mode)) {
             throw new InvalidFileModeException($mode);
         }
@@ -92,12 +112,8 @@ class File
      */
     public static function getContents(string $filePath): string
     {
-        if (!file_exists($filePath)) {
-            throw new FileDoesNotExistException($filePath);
-        }
-        if (!is_readable($filePath)) {
-            throw new FileNotReadableException($filePath);
-        }
+        self::mustExist($filePath);
+        self::mustBeReadable($filePath);
         try {
             $contents = file_get_contents($filePath);
         } catch (Throwable $e) {

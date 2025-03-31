@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace pvcTests\storage\filesys;
 
 use Exception;
@@ -19,16 +21,59 @@ class FileTest extends TestCase
 {
     protected MockFilesysFixture $fixture;
 
+    protected function setUp(): void
+    {
+        $this->fixture = new MockFilesysFixture();
+    }
+
     /**
      * @return void
-     * @covers \pvc\storage\filesys\File::open
+     * @throws FileDoesNotExistException
+     * @covers \pvc\storage\filesys\File::mustExist
      */
-    public function testOpenThrowsExceptionOpeningNonExistentFile(): void
+    public function testMustExistFailsWhenFileDoesNotExist(): void
     {
         $nonExistentFile = 'someBadFile.txt';
-        self::expectException(FileDoesNotExistException::class);
-        $handle = File::open($nonExistentFile, FileMode::READ);
-        unset($handle);
+        $this->expectException(FileDoesNotExistException::class);
+        File::mustExist($nonExistentFile);
+    }
+
+    /**
+     * @return void
+     * @throws FileDoesNotExistException
+     * @covers \pvc\storage\filesys\File::mustExist
+     */
+    public function testMustExistSucceeds(): void
+    {
+        $testFile = $this->fixture->getUrlFile();
+        self::assertTrue(File::mustExist($testFile));
+    }
+
+    /**
+     * @return void
+     * @throws FileNotReadableException
+     * @covers \pvc\storage\filesys\File::mustBeReadable
+     */
+    public function testFileMustBeReadableFailsWhenFileIsNotReadable(): void
+    {
+        $testFile = $this->fixture->getUrlFile();
+        /**
+         * allow only write permissions to the file
+         */
+        chmod($testFile, 0222);
+        self::expectException(FileNotReadableException::class);
+        File::mustBeReadable($testFile);
+    }
+
+    /**
+     * @return void
+     * @throws FileNotReadableException
+     * @covers \pvc\storage\filesys\File::mustBeReadable
+     */
+    public function testFileMustBeReadableSucceeds(): void
+    {
+        $testFile = $this->fixture->getUrlFile();
+        self::assertTrue(File::mustBeReadable($testFile));
     }
 
     /**
@@ -41,7 +86,7 @@ class FileTest extends TestCase
         /**
          * allow only read permissions to the file
          */
-        chmod($testFile, '0111');
+        chmod($testFile, 0111);
         self::expectException(FileOpenException::class);
         $handle = File::open($testFile, FileMode::WRITE);
         unset($handle);
@@ -135,83 +180,12 @@ class FileTest extends TestCase
      * @throws FileNotReadableException
      * @covers \pvc\storage\filesys\File::openReadOnly
      */
-    public function testOpenReadOnlyFailsIfFileDoesNotExist(): void
-    {
-        $nonExistentFile = 'someBadFile.txt';
-        self::expectException(FileDoesNotExistException::class);
-        $handle = File::openReadOnly($nonExistentFile, FileMode::READ);
-        unset($handle);
-    }
-
-    /**
-     * @return void
-     * @throws FileDoesNotExistException
-     * @throws FileNotReadableException
-     * @covers \pvc\storage\filesys\File::openReadOnly
-     */
-    public function testOpenReadonlyFailsIfFileExistsButIsNotReadable(): void
-    {
-        $testFile = $this->fixture->getUrlFile();
-        /**
-         * allow only write permissions to the file
-         */
-        chmod($testFile, '0222');
-        self::expectException(FileNotReadableException::class);
-        $handle = File::openReadOnly($testFile);
-        unset($handle);
-    }
-
-    /**
-     * @return void
-     * @throws FileDoesNotExistException
-     * @throws FileNotReadableException
-     * @covers \pvc\storage\filesys\File::openReadOnly
-     */
     public function testOpenReadonlySucceeds(): void
     {
         $testFile = $this->fixture->getUrlFile();
         $handle = File::openReadOnly($testFile);
         self::assertTrue(is_resource($handle));
         self::assertTrue(get_resource_type($handle) === 'stream');
-    }
-
-    protected function setUp(): void
-    {
-        $this->fixture = new MockFilesysFixture();
-    }
-
-    /**
-     * @return void
-     * @throws FileDoesNotExistException
-     * @throws FileNotReadableException
-     * @throws FileGetContentsException
-     * @covers \pvc\storage\filesys\File::getContents
-     */
-    public function testGetContentsFailsIfFileDoesNotExist(): void
-    {
-        $nonExistentFile = 'someBadFile.txt';
-        self::expectException(FileDoesNotExistException::class);
-        $contents = File::getContents($nonExistentFile);
-        unset($contents);
-    }
-
-    /**
-     * @return void
-     * @throws FileDoesNotExistException
-     * @throws FileNotReadableException
-     * @throws FileGetContentsException
-     * @covers \pvc\storage\filesys\File::getContents
-     */
-    public function testGetContentsFailsIfFileExistsButIsNotReadable(): void
-    {
-        $testFile = $this->fixture->getUrlFile();
-        /**
-         * allow only write permissions to the file
-         */
-        chmod($testFile, '0222');
-        self::expectException(FileNotReadableException::class);
-        $contents = File::getContents($testFile);
-        unset($contents);
     }
 
     /**
@@ -281,5 +255,4 @@ class FileTest extends TestCase
         unset($contents);
         uopz_unset_return('file_get_contents');
     }
-
 }
