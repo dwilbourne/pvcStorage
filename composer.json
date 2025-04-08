@@ -28,8 +28,6 @@
 	"require-dev": {
 		"phpunit/phpunit": "^9",
 		"mikey179/vfsstream": "*",
-		"squizlabs/php_codesniffer": "*",
-		"friendsofphp/php-cs-fixer": "*",
 		"phpstan/phpstan": "*",
 		"ext-uopz": "*"
 	}

@@ -51,6 +51,18 @@ class FileTest extends TestCase
 
     /**
      * @return void
+     * @throws FileDoesNotExistException
+     * @covers \pvc\storage\filesys\File::mustExist
+     */
+    public function testFileExistsFailsWithUrl(): void
+    {
+        $testFile = 'http://www.google.com';
+        self::expectException(FileDoesNotExistException::class);
+        File::mustExist($testFile);
+    }
+
+    /**
+     * @return void
      * @throws FileNotReadableException
      * @covers \pvc\storage\filesys\File::mustBeReadable
      */

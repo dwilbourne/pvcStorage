@@ -16,22 +16,26 @@ use Throwable;
 class File
 {
     /**
-     * @param string $filePath
-     * @return void
+     * @param string $localFileName
+     * @return true
      * @throws FileDoesNotExistException
      */
-    public static function mustExist(string $filePath): true
+    public static function mustExist(string $localFileName): true
     {
-        if (!file_exists($filePath)) {
-            throw new FileDoesNotExistException($filePath);
+        /**
+         * type checker is not aware that file
+         */
+        if (!file_exists($localFileName)) {
+            throw new FileDoesNotExistException($localFileName);
         }
         return true;
     }
 
     /**
      * @param string $filePath
-     * @return void
+     * @return true
      * @throws FileNotReadableException
+     * @throws FileDoesNotExistException
      */
     public static function mustBeReadable(string $filePath): true
     {
@@ -47,9 +51,7 @@ class File
 
     /**
      * @param string $filePath
-     * @return false|resource
-     * @throws FileDoesNotExistException
-     * @throws FileNotReadableException
+     * @return resource
      * adds a specific test to ensure the file is readable
      */
     public static function openReadOnly(string $filePath)
@@ -61,9 +63,7 @@ class File
     /**
      * @param string $filePath
      * @param string $mode
-     * @return false|resource
-     * @throws FileDoesNotExistException
-     * @throws FileNotReadableException
+     * @return resource
      */
     public static function open(string $filePath, string $mode = 'r')
     {
@@ -108,7 +108,6 @@ class File
     /**
      * @param string $filePath
      * @return string
-     * @throws FileDoesNotExistException
      * @throws FileGetContentsException
      * @throws FileNotReadableException
      */
